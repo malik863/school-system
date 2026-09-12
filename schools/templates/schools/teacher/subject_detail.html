@@ -1,0 +1,164 @@
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h2 class="mb-2">
+                {{ subject.name }}
+            </h2>
+
+            <div>
+                <span>الفصل:</span>
+                {{ classroom.name }}
+            </div>
+
+            <div>
+                <span>العام الدراسي:</span>
+                {{ classroom.academic_year }}
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>عدد الطلاب</h6>
+                    <h3>{{ student_count }}</h3>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>متوسط الأداء</h6>
+
+                    {% if subject_average is not None %}
+                        <h3>{{ subject_average }}%</h3>
+                    {% else %}
+                        <h3>-</h3>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>الحضور</h6>
+
+                    {% if subject_attendance is not None %}
+                        <h3>{{ subject_attendance }}%</h3>
+                    {% else %}
+                        <h3>-</h3>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>عدد التقييمات</h6>
+                    <h3>{{ assessment_count }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Students -->
+    <div class="card">
+
+        <div class="card-body">
+
+            <h4 class="mb-4">
+                طلاب المادة
+            </h4>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered">
+
+                    <thead>
+                        <tr>
+                            <th>الطالب</th>
+                            <th>رقم الطالب</th>
+                            <th>الحضور</th>
+                            <th>متوسط الأداء</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                            <tr>
+
+                                <td>
+                                    <a href="{% url 'teacher:student_detail' student.id %}">
+                                        {{ student.user.get_full_name|default:student.user.username }}
+                                    </a>
+                                </td>
+
+                                <td>
+                                    {{ student.student_number|default:"-" }}
+                                </td>
+
+                                <td>
+                                    {% if student.attendance_percentage is not None %}
+                                        {{ student.attendance_percentage }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if student.performance_percentage is not None %}
+                                        {{ student.performance_percentage }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    لا يوجد طلاب في هذا الفصل
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

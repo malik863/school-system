@@ -1,0 +1,73 @@
+
+
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="mb-4">
+
+        <h2>موادي وفصولي</h2>
+
+        <p class="text-muted mb-0">
+            المواد والفصول المسندة إليك
+        </p>
+
+    </div>
+
+
+    {% if assignments %}
+
+        <div class="row g-4">
+
+            {% for assignment in assignments %}
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="card h-100 shadow-sm">
+
+                        <div class="card-body">
+
+                            <h5>
+                                {{ assignment.subject.name }}
+                            </h5>
+
+                            <p class="text-muted">
+                                {{ assignment.classroom.name }}
+                                -
+                                الصف {{ assignment.classroom.grade_level }}
+                            </p>
+
+                            <p class="small text-muted">
+                                {{ assignment.classroom.academic_year.name }}
+                            </p>
+
+                            <a
+                                href="{% url 'teacher:subject_detail' assignment.pk %}"
+                                class="btn btn-primary w-100"
+                            >
+                                فتح المادة
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-info">
+            لا توجد تكليفات تدريسية مسندة إليك حاليًا.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
