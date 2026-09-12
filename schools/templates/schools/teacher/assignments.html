@@ -1,0 +1,112 @@
+
+{% extends "schools/teacher/base.html" %}
+
+{% block title %}
+فصولي وموادي
+{% endblock %}
+
+{% block assignments_active %}
+active
+{% endblock %}
+
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold mb-1">
+            فصولي وموادي
+        </h2>
+
+        <p class="text-muted mb-0">
+            الفصول والمواد المسندة إليك من إدارة المدرسة.
+        </p>
+
+    </div>
+
+</div>
+
+
+{% if assignments %}
+
+<div class="row g-4">
+
+    {% for assignment in assignments %}
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="dashboard-card">
+
+                <div class="d-flex justify-content-between align-items-start mb-3">
+
+                    <div>
+
+                        <span class="badge bg-secondary mb-2">
+                            الصف {{ assignment.classroom.grade_level }}
+                        </span>
+
+                        <h5 class="fw-bold mb-1">
+                            {{ assignment.classroom.name }}
+                        </h5>
+
+                    </div>
+
+                    <div class="stat-icon">
+
+                        <i class="fa-solid fa-book"></i>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <div class="text-muted small mb-1">
+                        المادة
+                    </div>
+
+                    <strong>
+                        {{ assignment.subject.name }}
+                    </strong>
+
+                </div>
+
+
+                <div class="text-muted small">
+
+                    <i class="fa-solid fa-calendar"></i>
+
+                    {{ assignment.classroom.academic_year.name }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="dashboard-card text-center py-5">
+
+    <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
+
+    <h5>
+        لا توجد تكليفات تدريسية
+    </h5>
+
+    <p class="text-muted mb-0">
+        لم يتم إسناد أي فصل أو مادة إليك من إدارة المدرسة بعد.
+    </p>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

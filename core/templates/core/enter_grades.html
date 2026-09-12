@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدخال الدرجات - {{ classroom.name }}</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; padding: 2rem; color: #1e293b; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.25rem; font-size: 0.9rem; }
+        .form-select, .form-control { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        .btn { background: #2563eb; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn:hover { background: #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: right; padding: 0.75rem; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; color: #475569; }
+        .alert { background: #fee2e2; color: #991b1b; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; }
+        .success { background: #dcfce7; color: #166534; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="margin-bottom: 1rem;">
+            <a href="{% url 'teacher_dashboard' %}" style="text-decoration: none; color: #2563eb;">← العودة للوحة التحكم</a>
+        </div>
+
+        <h1>إدخال الدرجات: {{ classroom.name }}</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}alert{% else %}success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="card">
+            <h2>إضافة درجة جديدة</h2>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert">{{ form.non_field_errors.0 }}</div>
+                {% endif %}
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>الطالب</label>
+                        {{ form.student }}
+                    </div>
+                    <div class="form-group">
+                        <label>المادة</label>
+                        {{ form.subject }}
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>الفصل الدراسي (الترم)</label>
+                        {{ form.term }}
+                    </div>
+                    <div class="form-group">
+                        <label>نوع التقييم</label>
+                        {{ form.assessment_type }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>عنوان التقييم</label>
+                    {{ form.title }}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>الدرجة المستحقة</label>
+                        {{ form.score }}
+                    </div>
+                    <div class="form-group">
+                        <label>الدرجة القصوى</label>
+                        {{ form.max_score }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">حفظ الدرجة</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>آخر الدرجات المسجلة في هذا الفصل</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الطالب</th>
+                        <th>المادة</th>
+                        <th>التقييم</th>
+                        <th>الدرجة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in recent_grades %}
+                        <tr>
+                            <td>{{ grade.student.get_full_name|default:grade.student.username }}</td>
+                            <td>{{ grade.subject.name }}</td>
+                            <td>{{ grade.title }}</td>
+                            <td><strong>{{ grade.score }}</strong> / {{ grade.max_score }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" style="color: #94a3b8; text-align: center;">لا توجد درجات مسجلة حديثاً.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

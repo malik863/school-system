@@ -1,0 +1,45 @@
+
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>
+        حذف النظام الأكاديمي
+    </h2>
+
+    <div class="alert alert-danger">
+
+        هل أنت متأكد من حذف النظام:
+
+        <strong>
+            {{ scheme.name }}
+        </strong>؟
+
+        <br><br>
+
+        سيتم حذف قواعد الدرجات المرتبطة به.
+
+    </div>
+
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <button type="submit"
+                class="btn btn-danger">
+            نعم، حذف
+        </button>
+
+        <a href="{% url 'manager:academic_scheme_list' %}"
+           class="btn btn-secondary">
+            إلغاء
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

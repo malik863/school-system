@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المعلم</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 2rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .section { background: #ffffff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
+        .section h2 { margin-top: 0; color: #0f172a; font-size: 1.25rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f8fafc; }
+        .list-item:last-child { border-bottom: none; }
+        .btn { background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.875rem; }
+        .btn:hover { background-color: #1d4ed8; }
+        .empty-state { color: #94a3b8; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 0.5rem;">لوحة تحكم المعلم</h1>
+        <p style="color: #64748b; margin-top: 0; margin-bottom: 2rem;">مرحباً بك، أستاذ {{ request.user.get_full_name|default:request.user.username }}</p>
+
+        <!-- Home Room Section (فصلي) -->
+        <div class="section">
+            <h2>إدارة الفصل (معلم فصل / فصلي)</h2>
+            {% if managed_classrooms %}
+                {% for classroom in managed_classrooms %}
+                    <div class="list-item">
+                        <div>
+                            <strong>{{ classroom.name }}</strong> 
+                            <span style="color: #64748b; font-size: 0.875rem;">(الصف {{ classroom.grade_level }} - {{ classroom.academic_year.name }})</span>
+                        </div>
+                        <a href="#" class="btn">عرض سجل الفصل السلوكي والنتائج</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-state">لست مسنداً كمعلم مسؤول عن فصل دراسي حالياً.</p>
+            {% endif %}
+        </div>
+
+        <!-- Subject Teaching Assignments (فصول أخرى) -->
+        <div class="section">
+            <h2>المواد المسندة إليك (التدريس والتقييم)</h2>
+            {% if teaching_assignments %}
+                {% for assignment in teaching_assignments %}
+                    <div class="list-item">
+                        <div>
+                            <strong>مادة: {{ assignment.subject.name }}</strong>
+                            <span style="color: #64748b; font-size: 0.875rem;">— فصل: {{ assignment.classroom.name }}</span>
+                        </div>
+                        <a href="#" class="btn">إدخال الدرجات / الحضور</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-state">لا توجد مواد دراسية مسندة إليك حالياً.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

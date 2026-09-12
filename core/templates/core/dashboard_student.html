@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}لوحة الطالب{% endblock %}
+{% block content %}
+<div class="py-4"><div class="card shadow-sm"><div class="card-body"><h2>مرحباً {{ request.user.get_full_name|default:request.user.username }}</h2><p class="mb-1">المدرسة: {{ request.user.school.name }}</p><p class="mb-0">الفصل: {{ student.classroom.name|default:"غير محدد" }}</p></div></div></div>
+{% endblock %}

@@ -1,0 +1,766 @@
+{% extends "schools/teacher/base.html" %}
+
+
+{% block title %}
+الرئيسية | لوحة المعلم
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<!-- =========================================================
+     PAGE HEADER
+========================================================== -->
+
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">
+            نظرة عامة
+        </h1>
+
+        <p class="page-subtitle">
+
+            مرحباً بك،
+            <strong>
+                {{ request.user.get_full_name|default:request.user.username }}
+            </strong>
+
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     STATISTICS
+========================================================== -->
+
+<div class="row g-3 mb-4">
+
+
+    <!-- ASSIGNMENTS -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        التكليفات التدريسية
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_assignments }}
+                    </div>
+
+                </div>
+
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-user-tie"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- CLASSES -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        الفصول
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_classes }}
+                    </div>
+
+                </div>
+
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-door-open"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- SUBJECTS -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        المواد
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_subjects }}
+                    </div>
+
+                </div>
+
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-book-open"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- LEAD CLASSES -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        فصول أقودها
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_lead_classes }}
+                    </div>
+
+                </div>
+
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-chalkboard-user"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     TEACHING ASSIGNMENTS + QUICK ACTIONS
+========================================================== -->
+
+<div class="row g-3 mb-4">
+
+
+    <!-- ASSIGNMENTS -->
+
+    <div class="col-lg-8">
+
+        <div class="content-card h-100">
+
+
+            <div class="content-card-header">
+
+                <div>
+
+                    <h2 class="content-card-title">
+
+                        <i class="fa-solid fa-user-tie text-primary ms-2"></i>
+
+                        التكليفات التدريسية
+
+                    </h2>
+
+                </div>
+
+
+                <a
+                    href="{% url 'teacher:assignments' %}"
+                    class="btn btn-outline-primary btn-sm"
+                >
+
+                    عرض الكل
+
+                </a>
+
+            </div>
+
+
+
+            <div class="content-card-body">
+
+
+                {% if assignments %}
+
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        الفصل
+                                    </th>
+
+                                    <th>
+                                        المادة
+                                    </th>
+
+                                    <th>
+                                        العام الدراسي
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+
+                            <tbody>
+
+
+                                {% for assignment in assignments|slice:":5" %}
+
+                                    <tr>
+
+
+                                        <td>
+
+                                            <strong>
+
+                                                {{ assignment.classroom.name }}
+
+                                            </strong>
+
+
+                                            <div class="small text-muted">
+
+                                                الصف
+                                                {{ assignment.classroom.grade_level }}
+
+                                            </div>
+
+                                        </td>
+
+
+
+                                        <td>
+
+                                            {{ assignment.subject.name }}
+
+                                        </td>
+
+
+
+                                        <td>
+
+                                            {{ assignment.classroom.academic_year.name }}
+
+                                        </td>
+
+
+                                    </tr>
+
+                                {% endfor %}
+
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                {% else %}
+
+
+                    <div class="text-center py-5 text-muted">
+
+                        <i
+                            class="fa-solid fa-inbox fa-2x mb-3"
+                        ></i>
+
+
+                        <p class="mb-0">
+
+                            لا توجد لديك تكليفات تدريسية حالياً.
+
+                        </p>
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- QUICK ACTIONS -->
+
+    <div class="col-lg-4">
+
+        <div class="content-card h-100">
+
+
+            <div class="content-card-header">
+
+                <h2 class="content-card-title">
+
+                    <i class="fa-solid fa-bolt text-primary ms-2"></i>
+
+                    الوصول السريع
+
+                </h2>
+
+            </div>
+
+
+
+            <div class="content-card-body">
+
+
+                <div class="d-grid gap-3">
+
+
+                    <!-- CLASSES -->
+
+                    <a
+                        href="{% url 'teacher:classes' %}"
+                        class="quick-action"
+                    >
+
+                        <div class="quick-action-icon">
+
+                            <i class="fa-solid fa-users"></i>
+
+                        </div>
+
+
+                        <div class="quick-action-text">
+
+                            <div class="quick-action-title">
+
+                                فصولي كمعلم فصل
+
+                            </div>
+
+
+                            <div class="quick-action-description">
+
+                                عرض وإدارة الفصول التي تقودها
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+
+
+                    <!-- SUBJECTS -->
+
+                    <a
+                        href="{% url 'teacher:subjects' %}"
+                        class="quick-action"
+                    >
+
+                        <div class="quick-action-icon">
+
+                            <i class="fa-solid fa-book-open"></i>
+
+                        </div>
+
+
+                        <div class="quick-action-text">
+
+                            <div class="quick-action-title">
+
+                                موادي وفصولي
+
+                            </div>
+
+
+                            <div class="quick-action-description">
+
+                                عرض المواد والفصول المسندة إليك
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+
+
+                    <!-- ATTENDANCE -->
+
+                    <a
+                        href="{% url 'teacher:attendance' %}"
+                        class="quick-action"
+                    >
+
+                        <div class="quick-action-icon">
+
+                            <i class="fa-solid fa-calendar-check"></i>
+
+                        </div>
+
+
+                        <div class="quick-action-text">
+
+                            <div class="quick-action-title">
+
+                                الحضور والغياب
+
+                            </div>
+
+
+                            <div class="quick-action-description">
+
+                                تسجيل ومتابعة حضور الطلاب
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+
+
+                    <!-- ASSESSMENTS -->
+
+                    <a
+                        href="{% url 'teacher:assessment_list' %}"
+                        class="quick-action"
+                    >
+
+                        <div class="quick-action-icon">
+
+                            <i class="fa-solid fa-file-pen"></i>
+
+                        </div>
+
+
+                        <div class="quick-action-text">
+
+                            <div class="quick-action-title">
+
+                                الاختبارات والمشاريع
+
+                            </div>
+
+
+                            <div class="quick-action-description">
+
+                                إدارة الاختبارات والتقييمات
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     TEACHER INFORMATION
+========================================================== -->
+
+<div class="row g-3 mb-4">
+
+
+    <!-- SCHOOL -->
+
+    <div class="col-md-6">
+
+        <div class="content-card h-100">
+
+
+            <div class="content-card-header">
+
+                <h2 class="content-card-title">
+
+                    <i class="fa-solid fa-school text-primary ms-2"></i>
+
+                    المدرسة
+
+                </h2>
+
+            </div>
+
+
+
+            <div class="content-card-body">
+
+                <div class="academic-info">
+
+
+                    <div class="academic-info-icon">
+
+                        <i class="fa-solid fa-school"></i>
+
+                    </div>
+
+
+                    <div class="flex-grow-1">
+
+                        <div class="academic-info-label">
+
+                            المدرسة
+
+                        </div>
+
+
+                        <div class="academic-info-value">
+
+                            {{ request.user.school.name }}
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ROLE -->
+
+    <div class="col-md-6">
+
+        <div class="content-card h-100">
+
+
+            <div class="content-card-header">
+
+                <h2 class="content-card-title">
+
+                    <i class="fa-solid fa-user-tie text-primary ms-2"></i>
+
+                    الحساب
+
+                </h2>
+
+            </div>
+
+
+
+            <div class="content-card-body">
+
+                <div class="academic-info">
+
+
+                    <div class="academic-info-icon">
+
+                        <i class="fa-solid fa-chalkboard-user"></i>
+
+                    </div>
+
+
+                    <div class="flex-grow-1">
+
+                        <div class="academic-info-label">
+
+                            نوع الحساب
+
+                        </div>
+
+
+                        <div class="academic-info-value">
+
+                            معلم
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="status-badge">
+
+                        <i class="fa-solid fa-check"></i>
+
+                        نشط
+
+                    </span>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     LEAD CLASSES
+========================================================== -->
+
+{% if lead_classes %}
+
+<div class="content-card">
+
+
+    <div class="content-card-header">
+
+        <div>
+
+            <h2 class="content-card-title">
+
+                <i class="fa-solid fa-chalkboard-user text-primary ms-2"></i>
+
+                الفصول التي أقودها
+
+            </h2>
+
+
+            <div class="small text-muted mt-1">
+
+                الفصول التي تم تعيينك كمعلم فصل لها
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="content-card-body">
+
+
+        <div class="row g-3">
+
+
+            {% for classroom in lead_classes %}
+
+
+                <div class="col-md-6 col-xl-4">
+
+                    <div class="quick-action h-100">
+
+
+                        <div class="quick-action-icon">
+
+                            <i class="fa-solid fa-door-open"></i>
+
+                        </div>
+
+
+                        <div class="quick-action-text">
+
+
+                            <div class="quick-action-title">
+
+                                {{ classroom.name }}
+
+                            </div>
+
+
+                            <div class="quick-action-description">
+
+                                الصف
+                                {{ classroom.grade_level }}
+
+                                {% if classroom.academic_year %}
+
+                                    •
+                                    {{ classroom.academic_year.name }}
+
+                                {% endif %}
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+{% endblock %}

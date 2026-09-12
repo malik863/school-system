@@ -1,0 +1,200 @@
+
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Student Header -->
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <h2 class="mb-2">
+                {{ student.user.get_full_name|default:student.user.username }}
+            </h2>
+
+            <div>
+                <span>رقم الطالب:</span>
+                {{ student.student_number|default:"-" }}
+            </div>
+
+            <div>
+                <span>الفصل:</span>
+                {{ classroom.name }}
+            </div>
+
+            <div>
+                <span>العمر:</span>
+                {% if age %}
+                    {{ age }} سنة
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>الحضور</h6>
+
+                    {% if attendance_percentage is not None %}
+                        <h3>{{ attendance_percentage }}%</h3>
+                    {% else %}
+                        <h3>-</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>متوسط الأداء</h6>
+
+                    {% if performance_percentage is not None %}
+                        <h3>{{ performance_percentage }}%</h3>
+                    {% else %}
+                        <h3>-</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>أيام الحضور</h6>
+
+                    <h3>
+                        {{ attended_attendance }}
+                        /
+                        {{ total_attendance }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Subjects -->
+    <div class="card">
+
+        <div class="card-body">
+
+            <h4 class="mb-4">
+                الأداء حسب المادة
+            </h4>
+
+            {% for data in subjects %}
+
+                <div class="mb-5">
+
+                    <!-- Subject title -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <h5>
+                            {{ data.subject.name }}
+                        </h5>
+
+                        <strong>
+                            {% if data.percentage is not None %}
+                                {{ data.percentage }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Assessments -->
+                    <div class="table-responsive">
+
+                        <table class="table table-bordered">
+
+                            <thead>
+                                <tr>
+                                    <th>اسم التقييم</th>
+                                    <th>النوع</th>
+                                    <th>التاريخ</th>
+                                    <th>الدرجة</th>
+                                    <th>الدرجة النهائية</th>
+                                    <th>النسبة</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for grade in data.grades %}
+
+                                    <tr>
+
+                                        <td>
+                                            {{ grade.assessment.title }}
+                                        </td>
+
+                                        <td>
+                                            {{ grade.assessment.get_assessment_type_display }}
+                                        </td>
+
+                                        <td>
+                                            {{ grade.assessment.date }}
+                                        </td>
+
+                                        <td>
+                                            {{ grade.score }}
+                                        </td>
+
+                                        <td>
+                                            {{ grade.assessment.max_score }}
+                                        </td>
+
+                                        <td>
+                                            {% widthratio grade.score grade.assessment.max_score 100 %}%
+                                        </td>
+
+                                    </tr>
+
+                                {% empty %}
+
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            لا توجد تقييمات مسجلة
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="text-center">
+                    لا توجد درجات مسجلة للطالب حتى الآن.
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}غير مسموح بالوصول{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1 class="display-1 text-danger fw-bold">403</h1>
+            <h3 class="mb-3">عفواً، ليس لديك صلاحية للوصول إلى هذه الصفحة</h3>
+            <p class="text-muted mb-4">
+                الحساب الحالي ({{ user.username }}) لا يملك الصلاحيات الكافية لعرض هذه الصفحة.
+            </p>
+
+            <div class="d-flex justify-content-center gap-2">
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">تسجيل الخروج والتبديل</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

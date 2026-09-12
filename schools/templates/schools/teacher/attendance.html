@@ -1,0 +1,235 @@
+
+{% extends "schools/teacher/base.html" %}
+
+{% block title %}الحضور والغياب{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">
+        الحضور والغياب
+    </h2>
+
+    <p class="text-muted mb-0">
+        تسجيل حضور وغياب طلاب الفصول التي أنت معلمها الرئيسي.
+    </p>
+</div>
+
+
+<!-- اختيار الفصل والتاريخ -->
+<div class="dashboard-card mb-4">
+
+    <form method="get">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+
+                <label class="form-label fw-bold">
+                    الفصل
+                </label>
+
+                {{ form.classroom }}
+
+                {% if form.classroom.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.classroom.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <label class="form-label fw-bold">
+                    التاريخ
+                </label>
+
+                {{ form.date }}
+
+                {% if form.date.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.date.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary w-100"
+                >
+                    <i class="fa-solid fa-users"></i>
+                    عرض الطلاب
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+{% if selected_classroom %}
+
+    {% if students %}
+
+        <!-- قائمة الطلاب -->
+        <div class="dashboard-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        {{ selected_classroom.name }}
+                    </h5>
+
+                    <small class="text-muted">
+                        الصف {{ selected_classroom.grade_level }}
+                        —
+                        {{ selected_date }}
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary">
+                    {{ students|length }} طالب
+                </span>
+
+            </div>
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="classroom"
+                    value="{{ selected_classroom.pk }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="date"
+                    value="{{ selected_date|date:'Y-m-d' }}"
+                >
+
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th style="width: 60px;">
+                                    #
+                                </th>
+
+                                <th>
+                                    الطالب
+                                </th>
+
+                                <th style="width: 220px;">
+                                    الحالة
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for student, field in form.student_fields %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ forloop.counter }}
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong>
+                                            {{ student.user.get_full_name|default:student.user.username }}
+                                        </strong>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ field }}
+
+                                        {% if field.errors %}
+
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="d-flex justify-content-end mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-success px-4"
+                    >
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+
+                        حفظ الحضور
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    {% else %}
+
+        <div class="dashboard-card">
+
+            <div class="text-center py-5 text-muted">
+
+                <i class="fa-solid fa-users-slash fa-2x mb-3"></i>
+
+                <p class="mb-0">
+                    لا يوجد طلاب مسجلون في هذا الفصل.
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+{% endif %}
+
+{% endblock %}
