@@ -11,7 +11,22 @@ class StudentProfile(SchoolOwnedModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="student_profile",
+        null=True,
+        blank=True,
         verbose_name="حساب الطالب",
+    )
+    first_name = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+        verbose_name="الاسم الأول",
+    )
+
+    last_name = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+        verbose_name="اسم العائلة",
     )
 
     classroom = models.ForeignKey(
@@ -80,11 +95,12 @@ class StudentProfile(SchoolOwnedModel):
                 )
 
     def __str__(self):
-        return (
-            self.user.get_full_name()
-            or self.user.username
-        )
+        full_name = f"{self.first_name} {self.last_name}".strip()
 
+        if full_name:
+            return full_name
+
+        return f"Student {self.student_number}"
 
 
 

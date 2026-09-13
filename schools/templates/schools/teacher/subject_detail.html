@@ -112,7 +112,7 @@
                             <tr>
 
                                 <td>
-                                    <a href="{% url 'teacher:student_detail' student.id %}">
+                                    <a href="{% url 'teacher:student_subject_detail' student.id assignment.id %}">
                                         {{ student.user.get_full_name|default:student.user.username }}
                                     </a>
                                 </td>

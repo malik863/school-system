@@ -92,7 +92,17 @@ urlpatterns = [
         name="subject_detail",
     ),
 
-    path("students/<int:student_id>/", views.teacher_student_detail, name="student_detail"),
+    path(
+    "students/<int:student_id>/",
+    views.teacher_student_detail,
+    name="student_detail",
+    ),
+
+    path(
+        "students/<int:student_id>/subject/<int:assignment_id>/",
+        views.teacher_student_subject_detail,
+        name="student_subject_detail",
+    ),
 
 
 

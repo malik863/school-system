@@ -38,6 +38,12 @@ from .models import AcademicYear, Term
 User = get_user_model()
 
 
+from django.shortcuts import render
+
+def landing_page(request):
+    return render(request, "schools/landing.html")
+
+
 def get_form_kwargs(request, **extra):
     kwargs = {"school": request.user.school}
     kwargs.update(extra)
@@ -499,8 +505,9 @@ def student_toggle_active(request, pk):
     student.is_active = not student.is_active
     student.save(update_fields=["is_active"])
 
-    student.user.is_active = student.is_active
-    student.user.save(update_fields=["is_active"])
+    if student.user_id:
+        student.user.is_active = student.is_active
+        student.user.save(update_fields=["is_active"])
 
     messages.success(
         request,
@@ -519,9 +526,12 @@ def student_delete(request, pk):
 
     if request.method == "POST":
         user = student.user
+
         with transaction.atomic():
             student.delete()
-            user.delete()
+
+            if user:
+                user.delete()
         messages.success(request, "تم حذف الطالب بنجاح.")
         return redirect("manager:student_list")
 
@@ -1404,5 +1414,171 @@ def teacher_student_detail(request, student_id):
     return render(
         request,
         "schools/teacher/student_detail.html",
+        context,
+    )
+
+@teacher_required
+def teacher_student_subject_detail(request, student_id, assignment_id):
+    teacher = request.user
+    school = teacher.school
+
+    # ---------------------------------------------------------
+    # Get the teacher's assignment
+    # ---------------------------------------------------------
+
+    assignment = get_object_or_404(
+        TeachingAssignment.objects
+        .select_related(
+            "classroom",
+            "classroom__academic_year",
+            "subject",
+        ),
+        pk=assignment_id,
+        school=school,
+        teacher=teacher,
+    )
+
+    classroom = assignment.classroom
+    subject = assignment.subject
+
+    # ---------------------------------------------------------
+    # Get student
+    # ---------------------------------------------------------
+
+    student = get_object_or_404(
+        StudentProfile.objects
+        .select_related(
+            "user",
+            "classroom",
+            "classroom__academic_year",
+        ),
+        pk=student_id,
+        school=school,
+        classroom=classroom,
+        is_active=True,
+    )
+
+    # ---------------------------------------------------------
+    # Attendance
+    #
+    # Attendance is class-level in your current system,
+    # so the teacher can see this student's attendance for
+    # the class they teach.
+    # ---------------------------------------------------------
+
+    attendance_records = Attendance.objects.filter(
+        school=school,
+        student=student,
+        classroom=classroom,
+    )
+
+    total_attendance = attendance_records.count()
+
+    attended_attendance = attendance_records.filter(
+        status__in=[
+            Attendance.Status.PRESENT,
+            Attendance.Status.LATE,
+            Attendance.Status.EXCUSED,
+        ]
+    ).count()
+
+    attendance_percentage = None
+
+    if total_attendance:
+        attendance_percentage = round(
+            (attended_attendance / total_attendance) * 100,
+            1,
+        )
+
+    # ---------------------------------------------------------
+    # Grades - THIS SUBJECT ONLY
+    # ---------------------------------------------------------
+
+    grades = (
+        Grade.objects
+        .filter(
+            school=school,
+            student=student,
+            assessment__classroom=classroom,
+            assessment__subject=subject,
+        )
+        .select_related(
+            "assessment",
+            "assessment__subject",
+            "assessment__term",
+        )
+        .order_by(
+            "-assessment__date",
+            "-assessment__id",
+        )
+    )
+
+    # ---------------------------------------------------------
+    # Subject performance
+    # ---------------------------------------------------------
+
+    total_score = grades.aggregate(
+        total=Sum("score")
+    )["total"]
+
+    total_max_score = grades.aggregate(
+        total=Sum("assessment__max_score")
+    )["total"]
+
+    performance_percentage = None
+
+    if total_max_score:
+        performance_percentage = round(
+            (
+                float(total_score)
+                / float(total_max_score)
+            ) * 100,
+            1,
+        )
+
+    # ---------------------------------------------------------
+    # Age
+    # ---------------------------------------------------------
+
+    age = None
+
+    if student.date_of_birth:
+        today = date.today()
+
+        age = (
+            today.year
+            - student.date_of_birth.year
+            - (
+                (today.month, today.day)
+                < (
+                    student.date_of_birth.month,
+                    student.date_of_birth.day,
+                )
+            )
+        )
+
+    # ---------------------------------------------------------
+    # Context
+    # ---------------------------------------------------------
+
+    context = {
+        "student": student,
+        "classroom": classroom,
+        "subject": subject,
+        "assignment": assignment,
+        "age": age,
+
+        "attendance_percentage": attendance_percentage,
+        "total_attendance": total_attendance,
+        "attended_attendance": attended_attendance,
+
+        "performance_percentage": performance_percentage,
+
+        "grades": grades,
+    }
+
+    return render(
+        request,
+        "schools/teacher/student_subject_detail.html",
         context,
     )

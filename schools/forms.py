@@ -91,6 +91,19 @@ class TeacherCreateForm(forms.ModelForm):
 
 
 class TeacherUpdateForm(forms.ModelForm):
+    password = forms.CharField(
+        label="كلمة المرور الجديدة",
+        required=False,
+        min_length=8,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "اتركها فارغة إذا لم ترد تغيير كلمة المرور",
+            }
+        ),
+        help_text="اترك هذا الحقل فارغًا للاحتفاظ بكلمة المرور الحالية.",
+    )
+
     class Meta:
         model = User
         fields = [
@@ -100,14 +113,27 @@ class TeacherUpdateForm(forms.ModelForm):
             "email",
             "phone_number",
             "is_active",
+            "password",
         ]
         widgets = {
-            "username": forms.TextInput(attrs={"class": "form-control"}),
-            "first_name": forms.TextInput(attrs={"class": "form-control"}),
-            "last_name": forms.TextInput(attrs={"class": "form-control"}),
-            "email": forms.EmailInput(attrs={"class": "form-control"}),
-            "phone_number": forms.TextInput(attrs={"class": "form-control"}),
-            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "username": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+            "first_name": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+            "last_name": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "form-control"}
+            ),
+            "phone_number": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+            "is_active": forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
+            ),
         }
         labels = {
             "username": "اسم المستخدم",
@@ -117,6 +143,20 @@ class TeacherUpdateForm(forms.ModelForm):
             "phone_number": "رقم الهاتف",
             "is_active": "الحساب نشط",
         }
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        password = self.cleaned_data.get("password")
+
+        # Only change the password if the manager entered a new one.
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+
+        return user
 
 
 # =========================================================
@@ -201,41 +241,58 @@ class SubjectForm(BaseSchoolForm):
 # =========================================================
 class StudentCreateForm(forms.ModelForm):
     username = forms.CharField(
-        label="اسم المستخدم",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        label="اسم المستخدم (اختياري)",
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+        }),
     )
 
     password = forms.CharField(
-        label="كلمة المرور",
-        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        label="كلمة المرور (اختيارية)",
+        required=False,
         min_length=8,
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control"
+        }),
     )
 
     first_name = forms.CharField(
         label="الاسم الأول",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+        }),
     )
 
     last_name = forms.CharField(
         label="اسم العائلة",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+        }),
     )
 
     email = forms.EmailField(
         label="البريد الإلكتروني",
         required=False,
-        widget=forms.EmailInput(attrs={"class": "form-control"}),
+        widget=forms.EmailInput(attrs={
+            "class": "form-control"
+        }),
     )
 
     phone_number = forms.CharField(
         label="رقم الهاتف",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+        }),
     )
 
     class Meta:
         model = StudentProfile
+
         fields = [
+            "first_name",
+            "last_name",
             "classroom",
             "student_number",
             "national_id",
@@ -282,16 +339,18 @@ class StudentCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.school:
-            # Set the school before Django runs model validation.
             self.instance.school = self.school
 
-            # Only show classrooms belonging to this school.
             self.fields["classroom"].queryset = Classroom.objects.filter(
                 school=self.school
             )
 
     def clean_username(self):
-        username = self.cleaned_data["username"]
+        username = self.cleaned_data.get("username")
+
+        # Username is optional for students.
+        if not username:
+            return None
 
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError(
@@ -299,6 +358,27 @@ class StudentCreateForm(forms.ModelForm):
             )
 
         return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        username = cleaned_data.get("username")
+        password = cleaned_data.get("password")
+
+        # If one credential is provided, require the other.
+        if username and not password:
+            self.add_error(
+                "password",
+                "يجب إدخال كلمة المرور عند إنشاء حساب للطالب."
+            )
+
+        if password and not username:
+            self.add_error(
+                "username",
+                "يجب إدخال اسم المستخدم عند إنشاء حساب للطالب."
+            )
+
+        return cleaned_data
 
     def clean_classroom(self):
         classroom = self.cleaned_data.get("classroom")
@@ -320,57 +400,86 @@ class StudentCreateForm(forms.ModelForm):
 
         return classroom
 
+    def clean_student_number(self):
+        student_number = self.cleaned_data.get("student_number", "").strip()
+
+        if not student_number:
+            return student_number
+
+        if StudentProfile.objects.filter(
+            school=self.school,
+            student_number=student_number,
+        ).exists():
+            raise forms.ValidationError(
+                "رقم الطالب مستخدم بالفعل في هذه المدرسة."
+            )
+
+        return student_number
+
     def save(self, commit=True):
         student = super().save(commit=False)
 
-        user = User(
-            username=self.cleaned_data["username"],
-            first_name=self.cleaned_data["first_name"],
-            last_name=self.cleaned_data["last_name"],
-            email=self.cleaned_data["email"],
-            phone_number=self.cleaned_data["phone_number"],
-            role=User.Role.STUDENT,
-            school=self.school,
-            email_verified=False,
-        )
+        username = self.cleaned_data.get("username")
+        password = self.cleaned_data.get("password")
 
-        user.set_password(
-            self.cleaned_data["password"]
-        )
+        # Only create a login account if credentials were provided.
+        if username and password:
+            user = User(
+                username=username,
+                first_name=self.cleaned_data["first_name"],
+                last_name=self.cleaned_data["last_name"],
+                email=self.cleaned_data["email"],
+                phone_number=self.cleaned_data["phone_number"],
+                role=User.Role.STUDENT,
+                school=self.school,
+                email_verified=False,
+            )
 
-        user.save()
+            user.set_password(password)
+            user.save()
 
-        student.user = user
+            student.user = user
+
         student.school = self.school
 
         if commit:
             student.save()
 
         return student
-
-    
 class StudentUpdateForm(forms.ModelForm):
     first_name = forms.CharField(
         label="الاسم الأول",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+        }),
     )
+
     last_name = forms.CharField(
         label="اسم العائلة",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+        }),
     )
+
     email = forms.EmailField(
         label="البريد الإلكتروني",
         required=False,
-        widget=forms.EmailInput(attrs={"class": "form-control"}),
+        widget=forms.EmailInput(attrs={
+            "class": "form-control"
+        }),
     )
+
     phone_number = forms.CharField(
         label="رقم الهاتف",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={
+            "class": "form-control"
+        }),
     )
 
     class Meta:
         model = StudentProfile
+
         fields = [
             "classroom",
             "student_number",
@@ -379,14 +488,31 @@ class StudentUpdateForm(forms.ModelForm):
             "date_of_birth",
             "is_active",
         ]
+
         widgets = {
-            "classroom": forms.Select(attrs={"class": "form-select"}),
-            "student_number": forms.TextInput(attrs={"class": "form-control"}),
-            "national_id": forms.TextInput(attrs={"class": "form-control"}),
-            "parent_phone": forms.TextInput(attrs={"class": "form-control"}),
-            "date_of_birth": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "classroom": forms.Select(
+                attrs={"class": "form-select"}
+            ),
+            "student_number": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+            "national_id": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+            "parent_phone": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+            "date_of_birth": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date"
+                }
+            ),
+            "is_active": forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
+            ),
         }
+
         labels = {
             "classroom": "الفصل",
             "student_number": "رقم الطالب",
@@ -405,31 +531,46 @@ class StudentUpdateForm(forms.ModelForm):
                 school=self.school
             )
 
-        if self.instance and self.instance.user_id:
+        # Student may not have a User account.
+        self.fields["first_name"].initial = self.instance.first_name
+        self.fields["last_name"].initial = self.instance.last_name
+
+        if self.instance.user_id:
             user = self.instance.user
-            self.fields["first_name"].initial = user.first_name
-            self.fields["last_name"].initial = user.last_name
+
             self.fields["email"].initial = user.email
             self.fields["phone_number"].initial = user.phone_number
 
     def save(self, commit=True):
         student = super().save(commit=False)
-        user = student.user
-        user.first_name = self.cleaned_data["first_name"]
-        user.last_name = self.cleaned_data["last_name"]
-        user.email = self.cleaned_data["email"]
-        user.phone_number = self.cleaned_data["phone_number"]
+
+        # Student name belongs to StudentProfile
+        student.first_name = self.cleaned_data["first_name"]
+        student.last_name = self.cleaned_data["last_name"]
+
+        # If the student has an account, keep the User information synchronized
+        if student.user_id:
+            user = student.user
+
+            user.first_name = student.first_name
+            user.last_name = student.last_name
+            user.email = self.cleaned_data["email"]
+            user.phone_number = self.cleaned_data["phone_number"]
+
+            if commit:
+                user.save(
+                    update_fields=[
+                        "first_name",
+                        "last_name",
+                        "email",
+                        "phone_number",
+                    ]
+                )
 
         if commit:
-            user.save(update_fields=["first_name", "last_name", "email", "phone_number"])
             student.save()
+
         return student
-
-
-# Backwards-compatible name for any code still importing StudentForm.
-StudentForm = StudentCreateForm
-
-
 # =========================================================
 # ACADEMIC YEAR
 # =========================================================
