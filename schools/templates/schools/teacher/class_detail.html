@@ -1,0 +1,336 @@
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Header -->
+
+    <div class="mb-4">
+
+        <a
+            href="{% url 'teacher:classes' %}"
+            class="text-decoration-none"
+        >
+            <i class="fa-solid fa-arrow-right"></i>
+            العودة إلى فصولي
+        </a>
+
+        <div class="mt-3">
+
+            <h2 class="mb-1">
+                {{ classroom.name }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                الصف {{ classroom.grade_level }}
+                -
+                {{ classroom.academic_year.name }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CLASS STATISTICS
+         ===================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Students -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-1">
+                                عدد الطلاب
+                            </p>
+
+                            <h2 class="mb-0">
+                                {{ student_count }}
+                            </h2>
+                        </div>
+
+                        <i class="fa-solid fa-users fa-2x"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Attendance -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                متوسط الحضور
+                            </p>
+
+                            {% if class_attendance is not None %}
+
+                                <h2 class="mb-0">
+                                    {{ class_attendance }}%
+                                </h2>
+
+                            {% else %}
+
+                                <h2 class="mb-0">
+                                    —
+                                </h2>
+
+                                <small class="text-muted">
+                                    لا توجد بيانات
+                                </small>
+
+                            {% endif %}
+
+                        </div>
+
+                        <i class="fa-solid fa-calendar-check fa-2x"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Performance -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                متوسط الأداء
+                            </p>
+
+                            {% if class_average is not None %}
+
+                                <h2 class="mb-0">
+                                    {{ class_average }}%
+                                </h2>
+
+                            {% else %}
+
+                                <h2 class="mb-0">
+                                    —
+                                </h2>
+
+                                <small class="text-muted">
+                                    لا توجد درجات بعد
+                                </small>
+
+                            {% endif %}
+
+                        </div>
+
+                        <i class="fa-solid fa-chart-line fa-2x"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         STUDENTS
+         ===================================================== -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h4 class="mb-1">
+                        الطلاب
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        الأداء والحضور الحالي للطلاب
+                    </p>
+
+                </div>
+
+                <span class="badge bg-secondary">
+                    {{ student_count }} طالب
+                </span>
+
+            </div>
+
+
+            {% if students %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    الطالب
+                                </th>
+
+                                <th>
+                                    رقم الطالب
+                                </th>
+
+                                <th>
+                                    الحضور
+                                </th>
+
+                                <th>
+                                    متوسط الأداء
+                                </th>
+
+                                <th>
+                                    التفاصيل
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for student in students %}
+
+                                <tr>
+
+                                    <!-- Student -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            {{ student.user.get_full_name }}
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Student number -->
+
+                                    <td>
+
+                                        {{ student.student_number|default:"-" }}
+
+                                    </td>
+
+
+                                    <!-- Attendance -->
+
+                                    <td>
+
+                                        {% if student.attendance_percentage is not None %}
+
+                                            <span>
+                                                {{ student.attendance_percentage }}%
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                لا توجد بيانات
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Performance -->
+
+                                    <td>
+
+                                        {% if student.performance_percentage is not None %}
+
+                                            <span>
+                                                {{ student.performance_percentage }}%
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                لا توجد درجات
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Details -->
+
+                                    <td>
+
+                                        <a href="{% url 'teacher:student_detail' student.id %}">
+                                            التفاصيل
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="alert alert-info mb-0">
+
+                    لا يوجد طلاب نشطون في هذا الفصل حاليًا.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

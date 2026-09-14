@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم مدير المدرسة</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 2rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .card { background: #ffffff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #64748b; }
+        .card p { margin: 0; font-size: 1.8rem; font-weight: bold; color: #0f172a; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; }
+        .badge { background-color: #e0f2fe; color: #0369a1; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 style="margin: 0;">لوحة تحكم مدير المدرسة</h1>
+                <p style="margin: 0.5rem 0 0 0; color: #64748b;">مرحباً بك، {{ request.user.get_full_name|default:request.user.username }}</p>
+            </div>
+            <span class="badge">
+                الترم الحالي: {{ active_term.name|default:"غير محدد" }}
+            </span>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3>إجمالي الطلاب</h3>
+                <p>{{ total_students }}</p>
+            </div>
+            <div class="card">
+                <h3>إجمالي الفصول</h3>
+                <p>{{ total_classrooms }}</p>
+            </div>
+            <div class="card">
+                <h3>متوسط درجات المدرسة</h3>
+                <p>{{ global_avg_grade }}%</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; background: #ffffff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <h2 style="margin-top: 0; font-size: 1.2rem;">روابط الإدارة السريعة</h2>
+            <ul style="line-height: 2;">
+                <li><a href="/admin/core/academicyear/">إدارة الأعوام الدراسية والأتراك</a></li>
+                <li><a href="/admin/core/gradeschemes/">إعداد خطط توزيع الدرجات (Grade Schemes)</a></li>
+                <li><a href="/admin/core/user/">إدارة المستخدمين والمعلمين</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

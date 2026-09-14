@@ -1,0 +1,348 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة مدرستك بسهولة، من مكان واحد</title>
+  <meta name="description" content="نظام متكامل يساعد إدارة المدرسة والمعلمين على تنظيم الطلاب والمعلمين والفصول والدرجات والحضور والشهادات.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <!-- ضع شعارك هنا داخل .logo-mark أو استبدل المحتوى بصورة -->
+    <a class="brand" href="/" aria-label="الصفحة الرئيسية">
+
+      <img src="{% static 'images/logo.png' %}" alt="شعار إدارة المدرسة" class="brand-logo">
+      <div class="brand-text">
+        <strong>منصة مدرستي</strong>
+        <span>نظام الإدارة التعليمية</span>
+      </div>
+    </a>
+
+    <nav class="desktop-nav">
+      <a href="#features">المميزات</a>
+      <a href="#difference">الفرق</a>
+      <a href="#how">كيف يعمل؟</a>
+      <a href="#pricing">الاشتراك</a>
+      <a href="#faq">الأسئلة الشائعة</a>
+    </nav>
+
+    <a class="nav-cta" href="#trial">جرّب مجانًا</a>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="hero-glow glow-one"></div>
+  <div class="hero-glow glow-two"></div>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">حل واحد لإدارة العملية التعليمية</div>
+      <h1>إدارة مدرستك بسهولة، <span>من مكان واحد</span></h1>
+      <p class="hero-text">
+        نظام يساعد الإدارة والمعلمين على تنظيم بيانات المدرسة، إدارة الطلاب
+        والمعلمين والفصول، تسجيل الدرجات والحضور، ومتابعة أداء الطلاب —
+        مع تقليل العمل اليدوي وتوفير الوقت.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#trial">جرّب النظام مجانًا لمدة أسبوعين</a>
+        <a class="btn btn-secondary" href="#features">اكتشف النظام</a>
+      </div>
+
+      <div class="trust-row">
+        <span>✓ تجربة مجانية</span>
+        <span>✓ دعم فني</span>
+        <span>✓ يعمل من الهاتف</span>
+      </div>
+    </div>
+
+    <div class="dashboard-mockup" aria-label="صورة توضيحية لواجهة النظام">
+      <div class="mockup-top">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="mock-title">لوحة تحكم المدرسة</span>
+      </div>
+      <div class="mockup-body">
+        <aside class="mock-sidebar">
+          <div class="mini-logo">شعار</div>
+          <div class="side-item active">الرئيسية</div>
+          <div class="side-item">الطلاب</div>
+          <div class="side-item">المعلمون</div>
+          <div class="side-item">الفصول</div>
+          <div class="side-item">الدرجات</div>
+          <div class="side-item">الحضور</div>
+        </aside>
+        <div class="mock-content">
+          <h3>مرحبًا بك في لوحة التحكم</h3>
+          <p>نظرة سريعة على بيانات المدرسة</p>
+          <div class="stat-grid">
+            <div class="stat"><small>الطلاب</small><strong>1,248</strong></div>
+            <div class="stat"><small>المعلمون</small><strong>68</strong></div>
+            <div class="stat"><small>الفصول</small><strong>32</strong></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head"><span>متابعة الأداء</span><b>هذا الشهر</b></div>
+            <div class="bars">
+              <i style="height:45%"></i><i style="height:62%"></i><i style="height:52%"></i>
+              <i style="height:78%"></i><i style="height:68%"></i><i style="height:88%"></i>
+              <i style="height:74%"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pain section">
+  <div class="container narrow">
+    <div class="section-label">المشكلة</div>
+    <h2>الكثير من الوقت يضيع في أعمال يمكن أن تكون أسهل</h2>
+    <p class="section-intro">عندما تكون بيانات المدرسة موزعة بين الأوراق والملفات، تصبح المهام اليومية أكثر تعقيدًا مما ينبغي.</p>
+    <div class="pain-grid">
+      <div>البحث بين الملفات والبيانات.</div>
+      <div>الاعتماد على الأوراق وملفات Excel.</div>
+      <div>إدخال الدرجات وحسابها يدويًا.</div>
+      <div>إعداد الشهادات.</div>
+      <div>متابعة الحضور والدرجات.</div>
+      <div>انتقال المعلومات بين أكثر من شخص ومكان.</div>
+    </div>
+    <div class="solution-note">
+      <strong>الحل؟</strong>
+      صُمم النظام ليجمع هذه العمليات في مكان واحد، ويجعل الوصول للمعلومات وتنفيذ المهام اليومية أسرع وأسهل.
+    </div>
+  </div>
+</section>
+
+<section id="features" class="section features">
+  <div class="container">
+    <div class="section-label">المميزات</div>
+    <h2>كل ما تحتاجه لإدارة العملية التعليمية في مكان واحد</h2>
+    <p class="section-intro">أدوات واضحة وصلاحيات مناسبة لكل مستخدم، دون تعقيد غير ضروري.</p>
+
+    <div class="feature-grid">
+      <article class="feature-card featured-card">
+        <div class="icon">⌘</div>
+        <h3>حساب مدير المدرسة</h3>
+        <ul>
+          <li>إنشاء وإدارة الطلاب.</li>
+          <li>إنشاء المعلمين وحساباتهم.</li>
+          <li>إدارة الفصول والمواد.</li>
+          <li>الاطلاع على الإحصائيات.</li>
+        </ul>
+      </article>
+
+      <article class="feature-card">
+        <div class="icon">👨‍🏫</div>
+        <h3>للمعلمين</h3>
+        <ul>
+          <li>حساب خاص لكل معلم.</li>
+          <li>تسجيل الحضور.</li>
+          <li>تسجيل الدرجات.</li>
+          <li>الوصول إلى بيانات الطلاب التي يحتاجها.</li>
+        </ul>
+      </article>
+
+      <article class="feature-card">
+        <div class="icon">📊</div>
+        <h3>الدرجات والتقييم</h3>
+        <ul>
+          <li>تسجيل مختلف أنواع الدرجات.</li>
+          <li>حساب الدرجات تلقائيًا.</li>
+          <li>متابعة أداء الطلاب.</li>
+          <li>إحصائيات تساعد على اكتشاف التراجع.</li>
+        </ul>
+      </article>
+
+      <article class="feature-card">
+        <div class="icon">📄</div>
+        <h3>الشهادات</h3>
+        <ul>
+          <li>إنشاء الشهادة تلقائيًا بناءً على الدرجات.</li>
+          <li>تجهيزها للطباعة.</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="impact section">
+  <div class="container">
+    <div class="section-label">القيمة العملية</div>
+    <h2>ماذا سيتغير في يومك؟</h2>
+
+    <div class="impact-grid">
+      <article>
+        <span>01</span>
+        <h3>🎯 وقت أقل في الأعمال الإدارية</h3>
+        <p>بدلًا من البحث عن البيانات وحساب الدرجات وتجهيز الشهادات يدويًا، ينفذ النظام الكثير من هذه العمليات بشكل أسرع وتلقائي.</p>
+        <b>وقت أكبر للمعلم للتركيز على مهمته الأساسية: التدريس والطلاب.</b>
+      </article>
+
+      <article>
+        <span>02</span>
+        <h3>📱 مدرستك معك أينما كنت</h3>
+        <p>بيانات المدرسة في مكان واحد ويمكن الوصول إليها عند الحاجة، دون الاعتماد المستمر على الملفات والأوراق.</p>
+        <b>الدرجات • معلومات الطلاب • الحضور • المتابعة</b>
+      </article>
+
+      <article>
+        <span>03</span>
+        <h3>🧮 لا تجعل الحسابات تأخذ وقتك</h3>
+        <p>سجّل الدرجات، ودع النظام يتولى حسابها وتنظيمها بدل تكرار الحسابات يدويًا.</p>
+        <b>درجات → حساب تلقائي → نتيجة → شهادة</b>
+      </article>
+
+      <article>
+        <span>04</span>
+        <h3>📊 متابعة أفضل للطلاب</h3>
+        <p>لا تكتفِ بتسجيل الدرجات؛ استخدم الإحصائيات لمتابعة أداء الطلاب واكتشاف التراجع في المستوى أو الحضور بشكل أسرع.</p>
+      </article>
+
+      <article>
+        <span>05</span>
+        <h3>🧘‍♂️ عمل أسهل وضغط أقل</h3>
+        <p>تقليل الأعمال الإدارية المتكررة يساعد على تخفيف الضغط الناتج عنها، ويتيح للمعلم توجيه وقته وطاقته بشكل أكبر نحو التدريس.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="difference" class="section compare">
+  <div class="container">
+    <div class="section-label">قبل وبعد</div>
+    <h2>بدلًا من... أصبح بإمكانك...</h2>
+    <div class="compare-table">
+      <div class="compare-head"><span>قبل</span><span>مع النظام</span></div>
+      <div class="compare-row"><span>البحث بين الملفات</span><span>الوصول للمعلومة من مكان واحد</span></div>
+      <div class="compare-row"><span>حساب الدرجات يدويًا</span><span>حساب تلقائي</span></div>
+      <div class="compare-row"><span>تجهيز الشهادات يدويًا</span><span>شهادات جاهزة للطباعة</span></div>
+      <div class="compare-row"><span>بيانات موزعة</span><span>بيانات منظمة</span></div>
+      <div class="compare-row"><span>متابعة صعبة</span><span>إحصائيات ومتابعة أسهل</span></div>
+      <div class="compare-row"><span>الاعتماد على الأوراق</span><span>إدارة رقمية من مكان واحد</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="tools section">
+  <div class="container">
+    <div class="section-label">أدوات الإدارة</div>
+    <h2>أدوات تساعدك على متابعة المدرسة بشكل أفضل</h2>
+    <div class="tool-grid">
+      <div><span>🖨️</span><h3>شهادات جاهزة للطباعة</h3><p>إنشاء الشهادات تلقائيًا بناءً على النتائج.</p></div>
+      <div><span>📊</span><h3>إحصائيات متقدمة</h3><p>رؤية مؤشرات مهمة تساعد الإدارة على متابعة أداء الطلاب.</p></div>
+      <div><span>📉</span><h3>متابعة مستوى الطلاب</h3><p>اكتشاف التراجع في مستوى الطالب ومتابعته بشكل أسرع.</p></div>
+      <div><span>📅</span><h3>متابعة الحضور</h3><p>تنظيم بيانات الحضور وتسهيل الوصول إليها.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="section how">
+  <div class="container">
+    <div class="section-label">ببساطة</div>
+    <h2>كيف يعمل؟</h2>
+    <div class="steps">
+      <div class="step"><strong>1</strong><h3>جهّز بيانات المدرسة</h3><p>أضف الطلاب والمعلمين والفصول والمواد.</p></div>
+      <div class="step"><strong>2</strong><h3>أعطِ كل شخص حسابه</h3><p>المدير والمعلمون يستخدمون حساباتهم وفق الصلاحيات المحددة لهم.</p></div>
+      <div class="step"><strong>3</strong><h3>يبدأ العمل</h3><p>المعلمون يسجلون الحضور والدرجات، والإدارة تتابع البيانات.</p></div>
+      <div class="step"><strong>4</strong><h3>النظام ينظم ويحسب</h3><p>الدرجات والإحصائيات والشهادات تُجهز بناءً على البيانات المدخلة.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" class="section pricing">
+  <div class="container pricing-wrap">
+    <div class="pricing-copy">
+      <div class="section-label">اشتراك المدرسة</div>
+      <h2>اشتراك واضح بدون تعقيد</h2>
+      <p>كل ما تحتاجه المدرسة للبدء، مع الدعم والتحديثات المهمة.</p>
+      <ul class="check-list">
+        <li>استخدام النظام للمدرسة</li>
+        <li>الدعم الفني</li>
+        <li>تحديثات مهمة تساعدك أكثر</li>
+        <li>حساب المدير وحسابات المعلمين</li>
+      </ul>
+    </div>
+
+    <div class="price-card">
+      
+      <div class="price-label">الاشتراك السنوي </div>
+      <div class="price">18,000 <small>جنيه</small></div>
+      <p>مع إمكانية التقسيط على 6 أشهر</p>
+      <div class="launch">
+        <span>✨ عرض الإطلاق الخاص</span>
+        <del>18,000 جنيه</del>
+        <strong>15,000 جنيه سنويًا</strong>
+        <small>اشترك خلال أسبوع واحصل على السعر الخاص</small>
+      </div>
+      <a class="btn btn-primary full" href="#trial">ابدأ تجربتك المجانية</a>
+    </div>
+  </div>
+</section>
+
+<section id="trial" class="trial section">
+  <div class="container">
+    <div class="trial-box">
+      <div>
+        <div class="section-label">جرّب قبل أن تقرر</div>
+        <h2>أسبوعان تجربة مجانية</h2>
+        <p>استكشف النظام، جرّبه على احتياجات مدرستك، وشاهد بنفسك كيف يمكن أن يسهل العمل اليومي.</p>
+      </div>
+      <a class="btn btn-white" href="mailto:YOUR-EMAIL@example.com?subject=طلب تجربة النظام">ابدأ تجربتك المجانية لمدة أسبوعين</a>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="section faq">
+  <div class="container narrow">
+    <div class="section-label">الأسئلة الشائعة</div>
+    <h2>أسئلة قد تكون في ذهنك</h2>
+
+    <details open><summary>هل يمكن تجربة النظام قبل الاشتراك؟</summary><p>نعم، تحصل على أسبوعين تجربة مجانية.</p></details>
+    <details><summary>هل يوجد حساب للمدير؟</summary><p>نعم، يوجد حساب خاص بالمدير يمكنه من خلاله إدارة ومتابعة العمليات المتاحة له.</p></details>
+    <details><summary>هل يحتاج المعلم إلى حساب خاص؟</summary><p>نعم، لكل معلم حساب وصلاحياته الخاصة.</p></details>
+    <details><summary>هل يمكن الوصول للنظام من الهاتف؟</summary><p>نعم، يمكن استخدام النظام من الهاتف.</p></details>
+    <details><summary>هل يتم حساب الدرجات تلقائيًا؟</summary><p>نعم، يتم حساب الدرجات تلقائيًا وفق الإعدادات المعتمدة في النظام.</p></details>
+    <details><summary>هل يمكن طباعة الشهادات؟</summary><p>نعم، يمكن تجهيز الشهادات للطباعة.</p></details>
+    <details><summary>هل يوجد دعم فني؟</summary><p>نعم، الدعم الفني مشمول بالاشتراك.</p></details>
+    <details><summary>هل يمكن الدفع بالتقسيط؟</summary><p>نعم، يمكن التقسيط على 6 أشهر.</p></details>
+    <details><summary>ماذا عن المدارس التي يزيد عدد طلابها عن 250 طالبًا؟</summary><p>للمدارس التي يزيد عدد طلابها عن 250 طالبًا،مشمولة في عرض الاطلاق و لكن يتم تحديد السعر حسب حجم المدرسة.</p></details>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="container">
+    <h2>هل حان وقت إدارة مدرستك بطريقة أسهل؟</h2>
+    <p>قلّل العمل اليدوي، نظّم بيانات مدرستك، ووفر وقت الإدارة والمعلمين.</p>
+    <a class="btn btn-primary" href="#trial">ابدأ تجربتك المجانية لمدة أسبوعين</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <a class="brand" href="/" aria-label="الصفحة الرئيسية">
+
+      <img src="{% static 'images/logo.png' %}" alt="شعار إدارة المدرسة" class="brand-logo">
+      <div class="brand-text">
+        <strong>منصة مدرستي</strong>
+        <span>نظام الإدارة التعليمية</span>
+      </div>
+    </a>
+
+    <p>© 2026 جميع الحقوق محفوظة.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>الاختبارات والمشاريع</h2>
+            <p class="text-muted">
+                إدارة الاختبارات والمشاريع الخاصة بالمواد والفصول المسندة إليك.
+            </p>
+        </div>
+
+        <a href="{% url 'teacher:assessment_create' %}"
+           class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            إنشاء تقييم
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            {% if assessments %}
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>التقييم</th>
+                                <th>النوع</th>
+                                <th>المادة</th>
+                                <th>الفصل</th>
+                                <th>الترم</th>
+                                <th>الدرجة النهائية</th>
+                                <th>التاريخ</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for assessment in assessments %}
+
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            {{ assessment.title }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        {% if assessment.assessment_type == "exam" %}
+                                            اختبار
+                                        {% else %}
+                                            مشروع
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.subject.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.classroom.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.term }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.max_score }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.date|date:"Y-m-d" }}
+                                    </td>
+
+                                    <td>
+
+                                        <a href="{% url 'teacher:assessment_detail' assessment.pk %}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            عرض
+                                        </a>
+
+                                        {% if assessment.created_by_id == request.user.id %}
+
+                                            <a href="{% url 'teacher:assessment_edit' assessment.pk %}"
+                                               class="btn btn-sm btn-outline-secondary">
+                                                تعديل
+                                            </a>
+
+                                            <a href="{% url 'teacher:assessment_delete' assessment.pk %}"
+                                               class="btn btn-sm btn-outline-danger">
+                                                حذف
+                                            </a>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+
+                    <h4>لا توجد تقييمات حتى الآن</h4>
+
+                    <p class="text-muted">
+                        يمكنك إنشاء أول اختبار أو مشروع.
+                    </p>
+
+                    <a href="{% url 'teacher:assessment_create' %}"
+                       class="btn btn-primary">
+                        إنشاء تقييم
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

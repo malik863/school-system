@@ -1,0 +1,922 @@
+{% extends "schools/base.html" %}
+
+{% block title %}
+الرئيسية | إدارة المدرسة
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     PAGE HEADER
+========================================================== -->
+
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">
+            نظرة عامة على المدرسة
+        </h1>
+
+        <p class="page-subtitle">
+            مرحباً بك في لوحة إدارة
+            <strong>{{ request.user.school.name }}</strong>
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     STATISTICS
+========================================================== -->
+
+<div class="row g-3 mb-4">
+
+
+    <!-- STUDENTS -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        إجمالي الطلاب
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_students }}
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TEACHERS -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        إجمالي المعلمين
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_teachers }}
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CLASSES -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        إجمالي الفصول
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_classes }}
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUBJECTS -->
+
+    <div class="col-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-top">
+
+                <div>
+
+                    <div class="stat-label">
+                        إجمالي المواد
+                    </div>
+
+                    <div class="stat-number">
+                        {{ total_subjects }}
+                    </div>
+
+                </div>
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ACADEMIC PERIOD
+========================================================== -->
+
+<div class="row g-3 mb-4">
+
+
+    <!-- CURRENT YEAR -->
+
+    <div class="col-md-6">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-header">
+
+                <h2 class="content-card-title">
+                    <i class="fa-solid fa-calendar-days text-primary ms-2"></i>
+                    العام الدراسي
+                </h2>
+
+            </div>
+
+            <div class="content-card-body">
+
+                {% if current_year %}
+
+                    <div class="academic-info">
+
+                        <div class="academic-info-icon">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <div class="academic-info-label">
+                                العام الدراسي الحالي
+                            </div>
+
+                            <div class="academic-info-value">
+                                {{ current_year.name }}
+                            </div>
+
+                        </div>
+
+                        <span class="status-badge">
+                            <i class="fa-solid fa-check"></i>
+                            حالي
+                        </span>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="academic-info">
+
+                        <div class="academic-info-icon">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                        </div>
+
+                        <div>
+
+                            <div class="academic-info-label">
+                                العام الدراسي الحالي
+                            </div>
+
+                            <div class="academic-info-value text-muted">
+                                لا يوجد عام دراسي حالي
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CURRENT TERM -->
+
+    <div class="col-md-6">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-header">
+
+                <h2 class="content-card-title">
+                    <i class="fa-solid fa-clock text-primary ms-2"></i>
+                    الترم الحالي
+                </h2>
+
+            </div>
+
+            <div class="content-card-body">
+
+                {% if current_term %}
+
+                    <div class="academic-info">
+
+                        <div class="academic-info-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <div class="academic-info-label">
+                                الترم الحالي
+                            </div>
+
+                            <div class="academic-info-value">
+                                {{ current_term.name }}
+                            </div>
+
+                        </div>
+
+                        <span class="status-badge">
+                            <i class="fa-solid fa-check"></i>
+                            حالي
+                        </span>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="academic-info">
+
+                        <div class="academic-info-icon">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+
+                        <div>
+
+                            <div class="academic-info-label">
+                                الترم الحالي
+                            </div>
+
+                            <div class="academic-info-value text-muted">
+                                لا يوجد ترم حالي
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     QUICK ACTIONS
+========================================================== -->
+
+<div class="content-card mb-4">
+
+    <div class="content-card-header">
+
+        <div>
+
+            <h2 class="content-card-title">
+                <i class="fa-solid fa-bolt text-primary ms-2"></i>
+                إجراءات سريعة
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="content-card-body">
+
+        <div class="row g-3">
+
+
+            <!-- ADD STUDENT -->
+
+            <div class="col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'manager:student_add' %}"
+                    class="quick-action h-100"
+                >
+
+                    <div class="quick-action-icon">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+
+                    <div class="quick-action-text">
+
+                        <div class="quick-action-title">
+                            إضافة طالب
+                        </div>
+
+                        <div class="quick-action-description">
+                            إنشاء حساب طالب جديد
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- ADD TEACHER -->
+
+            <div class="col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'manager:teacher_add' %}"
+                    class="quick-action h-100"
+                >
+
+                    <div class="quick-action-icon">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+
+                    <div class="quick-action-text">
+
+                        <div class="quick-action-title">
+                            إضافة معلم
+                        </div>
+
+                        <div class="quick-action-description">
+                            إنشاء حساب معلم جديد
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- ADD CLASS -->
+
+            <div class="col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'manager:class_add' %}"
+                    class="quick-action h-100"
+                >
+
+                    <div class="quick-action-icon">
+                        <i class="fa-solid fa-door-open"></i>
+                    </div>
+
+                    <div class="quick-action-text">
+
+                        <div class="quick-action-title">
+                            إضافة فصل
+                        </div>
+
+                        <div class="quick-action-description">
+                            إنشاء فصل دراسي جديد
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- ACADEMIC SCHEME -->
+
+            <div class="col-md-6 col-xl-3">
+
+                <a
+                    href="{% url 'manager:academic_scheme_add' %}"
+                    class="quick-action h-100"
+                >
+
+                    <div class="quick-action-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+
+                    <div class="quick-action-text">
+
+                        <div class="quick-action-title">
+                            إنشاء نظام أكاديمي
+                        </div>
+
+                        <div class="quick-action-description">
+                            تحديد مواد وفصول النظام
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SCHOOL MANAGEMENT
+========================================================== -->
+
+<div class="row g-3 mb-4">
+
+
+    <!-- SCHOOL MANAGEMENT -->
+
+    <div class="col-lg-6">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-header">
+
+                <h2 class="content-card-title">
+                    <i class="fa-solid fa-school text-primary ms-2"></i>
+                    إدارة المدرسة
+                </h2>
+
+            </div>
+
+
+            <div class="content-card-body">
+
+                <div class="row g-3">
+
+
+                    <!-- STUDENTS -->
+
+                    <div class="col-sm-6">
+
+                        <a
+                            href="{% url 'manager:student_list' %}"
+                            class="quick-action"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    الطلاب
+                                </div>
+
+                                <div class="quick-action-description">
+                                    إدارة الطلاب وحساباتهم
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- TEACHERS -->
+
+                    <div class="col-sm-6">
+
+                        <a
+                            href="{% url 'manager:teacher_list' %}"
+                            class="quick-action"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-chalkboard-user"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    المعلمون
+                                </div>
+
+                                <div class="quick-action-description">
+                                    إدارة المعلمين وحساباتهم
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- CLASSES -->
+
+                    <div class="col-sm-6">
+
+                        <a
+                            href="{% url 'manager:class_list' %}"
+                            class="quick-action"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-door-open"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    الفصول
+                                </div>
+
+                                <div class="quick-action-description">
+                                    إدارة الفصول الدراسية
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- SUBJECTS -->
+
+                    <div class="col-sm-6">
+
+                        <a
+                            href="{% url 'manager:subject_list' %}"
+                            class="quick-action"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    المواد
+                                </div>
+
+                                <div class="quick-action-description">
+                                    إدارة المواد الدراسية
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACADEMIC MANAGEMENT -->
+
+    <div class="col-lg-6">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-header">
+
+                <h2 class="content-card-title">
+                    <i class="fa-solid fa-graduation-cap text-primary ms-2"></i>
+                    الإدارة الأكاديمية
+                </h2>
+
+            </div>
+
+
+            <div class="content-card-body">
+
+                <div class="row g-3">
+
+
+                    <!-- ACADEMIC YEAR -->
+
+                    <div class="col-sm-6">
+
+                        <a
+                            href="{% url 'manager:academic_year_list' %}"
+                            class="quick-action"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    الأعوام والترمات
+                                </div>
+
+                                <div class="quick-action-description">
+                                    إدارة الأعوام والترمات
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- ACADEMIC SCHEMES -->
+
+                    <div class="col-sm-6">
+
+                        <a
+                            href="{% url 'manager:academic_scheme_list' %}"
+                            class="quick-action"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    الأنظمة الأكاديمية
+                                </div>
+
+                                <div class="quick-action-description">
+                                    الفصول والمواد ونظام الدراسة
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- TEACHING ASSIGNMENTS -->
+
+                    <div class="col-sm-6">
+
+                        <a
+                            href="{% url 'manager:teaching_assignment_list' %}"
+                            class="quick-action"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    التكليفات التدريسية
+                                </div>
+
+                                <div class="quick-action-description">
+                                    ربط المعلمين بالفصول والمواد
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- FUTURE ATTENDANCE -->
+
+                    <div class="col-sm-6">
+
+                        <div
+                            class="quick-action h-100"
+                            style="opacity: 0.65; cursor: default;"
+                        >
+
+                            <div class="quick-action-icon">
+                                <i class="fa-solid fa-clipboard-check"></i>
+                            </div>
+
+                            <div class="quick-action-text">
+
+                                <div class="quick-action-title">
+                                    الحضور والغياب
+                                </div>
+
+                                <div class="quick-action-description">
+                                    ستتوفر في مرحلة المعلمين
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SYSTEM STATUS
+========================================================== -->
+
+<div class="content-card">
+
+    <div class="content-card-header">
+
+        <h2 class="content-card-title">
+            <i class="fa-solid fa-circle-info text-primary ms-2"></i>
+            حالة النظام
+        </h2>
+
+    </div>
+
+
+    <div class="content-card-body">
+
+        <div class="row g-3">
+
+
+            <!-- YEAR STATUS -->
+
+            <div class="col-md-4">
+
+                <div class="academic-info">
+
+                    <div class="academic-info-icon">
+
+                        {% if current_year %}
+                            <i class="fa-solid fa-check"></i>
+                        {% else %}
+                            <i class="fa-solid fa-minus"></i>
+                        {% endif %}
+
+                    </div>
+
+                    <div>
+
+                        <div class="academic-info-label">
+                            العام الدراسي
+                        </div>
+
+                        <div class="academic-info-value">
+
+                            {% if current_year %}
+                                جاهز
+                            {% else %}
+                                يحتاج إعداد
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TERM STATUS -->
+
+            <div class="col-md-4">
+
+                <div class="academic-info">
+
+                    <div class="academic-info-icon">
+
+                        {% if current_term %}
+                            <i class="fa-solid fa-check"></i>
+                        {% else %}
+                            <i class="fa-solid fa-minus"></i>
+                        {% endif %}
+
+                    </div>
+
+                    <div>
+
+                        <div class="academic-info-label">
+                            الترم الحالي
+                        </div>
+
+                        <div class="academic-info-value">
+
+                            {% if current_term %}
+                                جاهز
+                            {% else %}
+                                يحتاج إعداد
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SCHOOL -->
+
+            <div class="col-md-4">
+
+                <div class="academic-info">
+
+                    <div class="academic-info-icon">
+
+                        <i class="fa-solid fa-school"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="academic-info-label">
+                            المدرسة
+                        </div>
+
+                        <div class="academic-info-value">
+
+                            {{ request.user.school.name }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

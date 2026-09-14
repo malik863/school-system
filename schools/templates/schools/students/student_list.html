@@ -1,0 +1,142 @@
+{% extends "schools/base.html" %}
+{% block title %}الطلاب{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">إدارة الطلاب</h1>
+        <p class="page-subtitle">عرض وإدارة طلاب المدرسة</p>
+    </div>
+    <a href="{% url 'manager:student_add' %}" class="btn btn-primary">
+        <i class="fa-solid fa-user-plus ms-1"></i> إضافة طالب
+    </a>
+</div>
+
+<div class="content-card mb-4">
+    <div class="content-card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-12 col-lg-6">
+                <label for="student-search" class="form-label">بحث</label>
+                <input id="student-search" type="text" name="q" value="{{ query }}"
+                       class="form-control" placeholder="اسم الطالب، اسم المستخدم، رقم الطالب أو ولي الأمر">
+            </div>
+            <div class="col-12 col-lg-4">
+                <label for="classroom-filter" class="form-label">الفصل</label>
+                <select id="classroom-filter" name="classroom" class="form-select">
+                    <option value="">كل الفصول</option>
+                    {% for classroom in classrooms %}
+                        <option value="{{ classroom.pk }}" {% if selected_classroom == classroom.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ classroom.name }} — الصف {{ classroom.grade_level }} ({{ classroom.academic_year.name }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="fa-solid fa-magnifying-glass"></i> بحث
+                </button>
+                <a href="{% url 'manager:student_list' %}" class="btn btn-outline-secondary" title="مسح الفلاتر">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="content-card-title">الطلاب</div>
+        <span class="text-muted small">{{ page_obj.paginator.count }} طالب</span>
+    </div>
+    <div class="content-card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الطالب</th>
+                        <th>رقم الطالب</th>
+                        <th>الفصل</th>
+                        <th>ولي الأمر</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                        <td class="fw-semibold">{{ student }}</td>
+                        <td>{{ student.student_number|default:"-" }}</td>
+                        <td>{{ student.classroom.name|default:"-" }}</td>
+                        <td>{{ student.parent_phone|default:"-" }}</td>
+                        <td>
+                            {% if student.is_active %}
+                                <span class="badge text-bg-success">نشط</span>
+                            {% else %}
+                                <span class="badge text-bg-secondary">غير نشط</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap">
+                            <a href="{% url 'manager:student_edit' student.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-pen"></i> تعديل
+                            </a>
+                            <form method="post" action="{% url 'manager:student_toggle_active' student.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-warning">
+                                    {% if student.is_active %}
+                                        <i class="fa-solid fa-user-slash"></i> تعطيل
+                                    {% else %}
+                                        <i class="fa-solid fa-user-check"></i> تفعيل
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <a href="{% url 'manager:student_delete' student.pk %}" class="btn btn-sm btn-outline-danger">
+                                <i class="fa-solid fa-trash"></i> حذف
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fa-solid fa-user-group fs-2 mb-3 d-block"></i>
+                                لا توجد نتائج مطابقة.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-4" aria-label="تنقل الطلاب">
+    <ul class="pagination justify-content-center flex-wrap">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query|urlencode }}&classroom={{ selected_classroom|urlencode }}&page={{ page_obj.previous_page_number }}">السابق</a>
+            </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <li class="page-item"><a class="page-link" href="?q={{ query|urlencode }}&classroom={{ selected_classroom|urlencode }}&page={{ num }}">{{ num }}</a></li>
+            {% elif num == 2 or num == page_obj.paginator.num_pages|add:"-1" %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query|urlencode }}&classroom={{ selected_classroom|urlencode }}&page={{ page_obj.next_page_number }}">التالي</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

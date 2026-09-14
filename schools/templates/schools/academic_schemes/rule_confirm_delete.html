@@ -1,0 +1,47 @@
+
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>
+        حذف قاعدة الدرجات
+    </h2>
+
+    <p>
+
+        هل أنت متأكد من حذف قاعدة
+
+        <strong>
+            {{ rule.get_assessment_type_display }}
+        </strong>
+
+        من النظام:
+
+        <strong>
+            {{ rule.scheme.name }}
+        </strong>؟
+
+    </p>
+
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <button type="submit"
+                class="btn btn-danger">
+            نعم، حذف
+        </button>
+
+        <a href="{% url 'manager:academic_scheme_edit' rule.scheme.pk %}"
+           class="btn btn-secondary">
+            إلغاء
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

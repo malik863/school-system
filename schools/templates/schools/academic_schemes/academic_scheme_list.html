@@ -1,0 +1,189 @@
+{% extends "schools/base.html" %}
+
+{% block title %}
+    الأنظمة الأكاديمية
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                الأنظمة الأكاديمية
+            </h2>
+
+            <p class="text-muted mb-0">
+                إدارة الأنظمة التي تحدد الفصول والمواد ونظام الدرجات.
+            </p>
+        </div>
+
+        <a href="{% url 'manager:academic_scheme_add' %}"
+           class="btn btn-primary">
+
+            <i class="fa-solid fa-plus ms-2"></i>
+
+            إنشاء نظام أكاديمي
+
+        </a>
+
+    </div>
+
+
+    {% if schemes %}
+
+        <div class="row g-4">
+
+            {% for scheme in schemes %}
+
+                <div class="col-md-6 col-xl-4">
+
+                    <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+
+                                <div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        {{ scheme.name }}
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        نظام أكاديمي
+                                    </small>
+
+                                </div>
+
+                                <i class="fa-solid fa-layer-group text-primary fs-4"></i>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <div class="mb-3">
+
+                                <div class="text-muted small mb-2">
+                                    الفصول
+                                </div>
+
+                                {% for classroom in scheme.classrooms.all %}
+
+                                    <span class="badge bg-light text-dark border me-1 mb-1">
+                                        {{ classroom.name }}
+                                    </span>
+
+                                {% empty %}
+
+                                    <span class="text-muted">
+                                        لا توجد فصول
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+
+                            <div class="mb-3">
+
+                                <div class="text-muted small mb-2">
+                                    المواد
+                                </div>
+
+                                {% for subject in scheme.subjects.all %}
+
+                                    <span class="badge bg-light text-dark border me-1 mb-1">
+                                        {{ subject.name }}
+                                    </span>
+
+                                {% empty %}
+
+                                    <span class="text-muted">
+                                        لا توجد مواد
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+
+                            <div class="mb-3">
+
+                                <div class="text-muted small mb-2">
+                                    نظام الدرجات
+                                </div>
+
+                                <span class="badge bg-primary">
+                                    {{ scheme.grade_scheme.name }}
+                                </span>
+
+                            </div>
+
+
+                            <div class="d-flex gap-2 mt-4">
+
+                                <a href="{% url 'manager:academic_scheme_edit' scheme.pk %}"
+                                   class="btn btn-outline-primary btn-sm flex-fill">
+
+                                    <i class="fa-solid fa-pen ms-1"></i>
+
+                                    تعديل
+
+                                </a>
+
+                                <a href="{% url 'manager:academic_scheme_delete' scheme.pk %}"
+                                   class="btn btn-outline-danger btn-sm">
+
+                                    <i class="fa-solid fa-trash"></i>
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body text-center py-5">
+
+                <i class="fa-solid fa-layer-group fs-1 text-muted mb-3"></i>
+
+                <h5 class="fw-bold">
+                    لا توجد أنظمة أكاديمية
+                </h5>
+
+                <p class="text-muted">
+                    أنشئ أول نظام أكاديمي لتحديد المواد والفصول ونظام الدرجات.
+                </p>
+
+                <a href="{% url 'manager:academic_scheme_add' %}"
+                   class="btn btn-primary">
+
+                    إنشاء النظام الأول
+
+                </a>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

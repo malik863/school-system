@@ -1,0 +1,189 @@
+
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>{{ assessment.title }}</h2>
+
+            <p class="text-muted mb-0">
+                {{ assessment.subject.name }}
+                -
+                {{ assessment.classroom.name }}
+            </p>
+        </div>
+
+        <div>
+
+            <a href="{% url 'teacher:assessment_grades' assessment.pk %}"
+               class="btn btn-primary">
+                <i class="fas fa-pen"></i>
+                إدخال الدرجات
+            </a>
+
+            {% if assessment.created_by_id == request.user.id %}
+
+                <a href="{% url 'teacher:assessment_edit' assessment.pk %}"
+                   class="btn btn-outline-secondary">
+                    تعديل
+                </a>
+
+            {% endif %}
+
+            <a href="{% url 'teacher:assessment_list' %}"
+               class="btn btn-outline-secondary">
+                العودة
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <small class="text-muted">نوع التقييم</small>
+
+                    <h5 class="mt-2">
+                        {% if assessment.assessment_type == "exam" %}
+                            اختبار
+                        {% else %}
+                            مشروع
+                        {% endif %}
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <small class="text-muted">الدرجة النهائية</small>
+
+                    <h5 class="mt-2">
+                        {{ assessment.max_score }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <small class="text-muted">الترم</small>
+
+                    <h5 class="mt-2">
+                        {{ assessment.term }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <small class="text-muted">التاريخ</small>
+
+                    <h5 class="mt-2">
+                        {{ assessment.date|date:"Y-m-d" }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                الطلاب والدرجات
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            {% if student_rows %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover">
+
+                        <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>الدرجة</th>
+                                <th>النسبة</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for row in student_rows %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ row.student.user.get_full_name|default:row.student.user.username }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if row.grade %}
+                                            {{ row.grade.score }}
+                                            /
+                                            {{ assessment.max_score }}
+                                        {% else %}
+                                            <span class="text-muted">
+                                                لم تسجل
+                                            </span>
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if row.grade %}
+                                            {% widthratio row.grade.score assessment.max_score 100 %}%
+                                        {% else %}
+                                            —
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <p class="text-muted">
+                    لا يوجد طلاب في هذا الفصل.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
