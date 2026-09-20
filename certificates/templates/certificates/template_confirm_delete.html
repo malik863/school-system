@@ -1,0 +1,45 @@
+
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <h3>حذف قالب الشهادة</h3>
+
+            <p>
+                هل أنت متأكد من حذف
+                <strong>{{ template.name }}</strong>؟
+            </p>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                >
+                    نعم، حذف
+                </button>
+
+                <a
+                    href="{% url 'certificates:template_list' %}"
+                    class="btn btn-secondary"
+                >
+                    إلغاء
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

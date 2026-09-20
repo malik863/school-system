@@ -1,0 +1,840 @@
+
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>تصميم الشهادة</h2>
+            <p class="text-muted mb-0">
+                {{ template.name }}
+            </p>
+        </div>
+
+        <button type="submit" form="designer-form" class="btn btn-success">
+            حفظ التصميم
+        </button>
+    </div>
+
+
+    <div class="row">
+
+        <!-- LEFT PANEL -->
+        <div class="col-md-3">
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    إضافة حقل
+                </div>
+
+                <div class="card-body">
+
+                    <label class="form-label">
+                        نوع الحقل
+                    </label>
+
+                    <select id="field-type" class="form-select mb-3">
+
+                        <option value="">
+                            اختر الحقل
+                        </option>
+
+                        {% for value, label in field_types %}
+                            <option value="{{ value }}">
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                    <button
+                        type="button"
+                        id="add-field"
+                        class="btn btn-primary w-100"
+                    >
+                        إضافة الحقل
+                    </button>
+
+                </div>
+            </div>
+
+
+            <!-- FIELD SETTINGS -->
+
+            <div
+                class="card"
+                id="field-settings"
+                style="display:none;"
+            >
+
+                <div class="card-header">
+                    إعدادات الحقل
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            النص
+                        </label>
+
+                        <input
+                            type="text"
+                            id="field-label"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            حجم الخط
+                        </label>
+
+                        <input
+                            type="number"
+                            id="field-font-size"
+                            class="form-control"
+                            min="1"
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            المحاذاة
+                        </label>
+
+                        <select
+                            id="field-alignment"
+                            class="form-select"
+                        >
+
+                            <option value="left">
+                                يسار
+                            </option>
+
+                            <option value="center">
+                                وسط
+                            </option>
+
+                            <option value="right">
+                                يمين
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-check mb-3">
+
+                        <input
+                            type="checkbox"
+                            id="field-bold"
+                            class="form-check-input"
+                        >
+
+                        <label
+                            class="form-check-label"
+                            for="field-bold"
+                        >
+                            خط عريض
+                        </label>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="delete-field"
+                        class="btn btn-danger w-100"
+                    >
+                        حذف الحقل
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CERTIFICATE -->
+
+        <div class="col-md-9">
+
+            <div
+                id="canvas-wrapper"
+                style="
+                    width:100%;
+                    overflow:auto;
+                    background:#eee;
+                    padding:30px;
+                "
+            >
+
+                <div id="certificate-canvas">
+
+                    <img
+                        id="certificate-background"
+                        src="{{ template.background.url }}"
+                        draggable="false"
+                    >
+
+                    {% for field in fields %}
+
+                        <div
+                            class="certificate-field"
+                            data-id="{{ field.id }}"
+                            data-field-type="{{ field.field_type }}"
+                            data-label="{{ field.label }}"
+                            data-font-size="{{ field.font_size }}"
+                            data-alignment="{{ field.alignment }}"
+                            data-bold="{{ field.is_bold|yesno:'true,false' }}"
+                            style="
+                                left:{{ field.x }}px;
+                                top:{{ field.y }}px;
+                                width:{{ field.width }}px;
+                                height:{{ field.height }}px;
+                                font-size:{{ field.font_size }}px;
+                                text-align:{{ field.alignment }};
+                                font-weight:{% if field.is_bold %}bold{% else %}normal{% endif %};
+                            "
+                        >
+                            {{ field.label|default:field.get_field_type_display }}
+
+                            <div class="resize-handle"></div>
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<form
+    method="POST"
+    id="designer-form"
+>
+    {% csrf_token %}
+
+    <input
+        type="hidden"
+        name="fields_data"
+        id="fields_data"
+    >
+
+</form>
+
+
+<style>
+
+#certificate-canvas {
+
+    position: relative;
+
+    width: {{ template.width }}px;
+
+    height: {{ template.height }}px;
+
+    transform-origin: top left;
+
+    margin: auto;
+
+    background: white;
+
+    box-shadow: 0 0 10px rgba(0,0,0,.2);
+
+}
+
+
+#certificate-background {
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    user-select: none;
+
+    pointer-events: none;
+
+}
+
+
+.certificate-field {
+
+    position: absolute;
+
+    border: 2px dashed #007bff;
+
+    background: rgba(255,255,255,.25);
+
+    cursor: move;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+
+    user-select: none;
+
+}
+
+
+.certificate-field.selected {
+
+    border: 2px solid red;
+
+}
+
+
+.resize-handle {
+
+    position: absolute;
+
+    width: 14px;
+
+    height: 14px;
+
+    right: -2px;
+
+    bottom: -2px;
+
+    background: #007bff;
+
+    cursor: nwse-resize;
+
+}
+
+
+</style>
+
+
+<script>
+
+const canvas = document.getElementById("certificate-canvas");
+
+const addButton = document.getElementById("add-field");
+
+const fieldTypeSelect = document.getElementById("field-type");
+
+const settings = document.getElementById("field-settings");
+
+const labelInput = document.getElementById("field-label");
+
+const fontSizeInput = document.getElementById("field-font-size");
+
+const alignmentInput = document.getElementById("field-alignment");
+
+const boldInput = document.getElementById("field-bold");
+
+const deleteButton = document.getElementById("delete-field");
+
+const fieldsDataInput = document.getElementById("fields_data");
+
+let selectedField = null;
+
+const SAMPLE_DATA = {
+    student_name: "Ahmed Mohamed",
+    student_id: "ST-1001",
+    class_name: "Grade 4A",
+    academic_year: "2025/2026",
+    total: "460 / 500",
+    percentage: "92%",
+    result: "Passed",
+    attendance: "96%",
+    date: "16/09/2026"
+};
+
+/* SCALE */
+
+function getScale() {
+
+    return canvas.getBoundingClientRect().width / {{ template.width }};
+
+}
+
+
+/* ADD FIELD */
+
+addButton.addEventListener("click", function() {
+
+    const type = fieldTypeSelect.value;
+
+    if (!type) {
+        alert("اختر نوع الحقل أولاً");
+        return;
+    }
+
+
+    const option =
+        fieldTypeSelect.options[
+            fieldTypeSelect.selectedIndex
+        ];
+
+    const label = option.text;
+    const previewText = SAMPLE_DATA[type] || label;
+
+
+    const field = document.createElement("div");
+
+    field.className = "certificate-field";
+
+    field.dataset.id = "";
+
+    field.dataset.fieldType = type;
+
+    field.dataset.label = label;
+
+    field.dataset.fontSize = "40";
+
+    field.dataset.alignment = "center";
+
+    field.dataset.bold = "false";
+
+
+    field.style.left = "100px";
+
+    field.style.top = "100px";
+
+    field.style.width = "500px";
+
+    field.style.height = "100px";
+
+    field.style.fontSize = "40px";
+
+    field.style.textAlign = "center";
+
+    field.style.fontWeight = "normal";
+
+
+    field.innerHTML = `
+        <span class="field-text">${previewText}</span>
+        <div class="resize-handle"></div>
+    `;
+
+
+    canvas.appendChild(field);
+
+    selectField(field);
+
+});
+
+
+/* SELECT FIELD */
+
+function selectField(field) {
+
+    if (selectedField) {
+        selectedField.classList.remove("selected");
+    }
+
+
+    selectedField = field;
+
+    selectedField.classList.add("selected");
+
+    settings.style.display = "block";
+
+
+    labelInput.value =
+        field.dataset.label || "";
+
+
+    fontSizeInput.value =
+        field.dataset.fontSize || 40;
+
+
+    alignmentInput.value =
+        field.dataset.alignment || "center";
+
+
+    boldInput.checked =
+        field.dataset.bold === "true";
+
+}
+
+
+/* FIELD CLICK */
+
+canvas.addEventListener("click", function(e) {
+
+    const field =
+        e.target.closest(".certificate-field");
+
+
+    if (!field) {
+        return;
+    }
+
+
+    selectField(field);
+
+});
+
+
+/* DRAG */
+
+let dragging = false;
+
+let dragStartX = 0;
+
+let dragStartY = 0;
+
+let fieldStartX = 0;
+
+let fieldStartY = 0;
+
+
+canvas.addEventListener("pointerdown", function(e) {
+
+    const field =
+        e.target.closest(".certificate-field");
+
+
+    if (!field) {
+        return;
+    }
+
+
+    if (
+        e.target.classList.contains(
+            "resize-handle"
+        )
+    ) {
+        return;
+    }
+
+
+    selectField(field);
+
+    dragging = true;
+
+    const scale = getScale();
+
+
+    dragStartX = e.clientX;
+
+    dragStartY = e.clientY;
+
+
+    fieldStartX =
+        parseFloat(field.style.left);
+
+
+    fieldStartY =
+        parseFloat(field.style.top);
+
+
+    field.setPointerCapture(e.pointerId);
+
+});
+
+
+canvas.addEventListener("pointermove", function(e) {
+
+    if (!dragging || !selectedField) {
+        return;
+    }
+
+
+    const scale = getScale();
+
+
+    const dx =
+        (e.clientX - dragStartX) / scale;
+
+
+    const dy =
+        (e.clientY - dragStartY) / scale;
+
+
+    selectedField.style.left =
+        Math.max(
+            0,
+            fieldStartX + dx
+        ) + "px";
+
+
+    selectedField.style.top =
+        Math.max(
+            0,
+            fieldStartY + dy
+        ) + "px";
+
+});
+
+
+canvas.addEventListener("pointerup", function() {
+
+    dragging = false;
+
+});
+
+
+/* RESIZE */
+
+let resizing = false;
+
+let resizeStartX = 0;
+
+let resizeStartY = 0;
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+canvas.addEventListener("pointerdown", function(e) {
+
+    if (
+        !e.target.classList.contains(
+            "resize-handle"
+        )
+    ) {
+        return;
+    }
+
+
+    const field =
+        e.target.closest(".certificate-field");
+
+
+    selectField(field);
+
+
+    resizing = true;
+
+
+    resizeStartX = e.clientX;
+
+    resizeStartY = e.clientY;
+
+
+    startWidth =
+        parseFloat(field.style.width);
+
+
+    startHeight =
+        parseFloat(field.style.height);
+
+
+    field.setPointerCapture(e.pointerId);
+
+});
+
+
+canvas.addEventListener("pointermove", function(e) {
+
+    if (!resizing || !selectedField) {
+        return;
+    }
+
+
+    const scale = getScale();
+
+
+    const dx =
+        (e.clientX - resizeStartX) / scale;
+
+
+    const dy =
+        (e.clientY - resizeStartY) / scale;
+
+
+    selectedField.style.width =
+        Math.max(
+            50,
+            startWidth + dx
+        ) + "px";
+
+
+    selectedField.style.height =
+        Math.max(
+            30,
+            startHeight + dy
+        ) + "px";
+
+});
+
+
+canvas.addEventListener("pointerup", function() {
+
+    resizing = false;
+
+});
+
+
+/* SETTINGS */
+
+labelInput.addEventListener("input", function() {
+
+    if (!selectedField) return;
+
+
+    selectedField.dataset.label =
+        this.value;
+
+
+    selectedField.querySelector(".field-text").textContent =
+        this.value;
+
+});
+
+
+fontSizeInput.addEventListener("input", function() {
+
+    if (!selectedField) return;
+
+
+    selectedField.dataset.fontSize =
+        this.value;
+
+
+    selectedField.style.fontSize =
+        this.value + "px";
+
+});
+
+
+alignmentInput.addEventListener("change", function() {
+
+    if (!selectedField) return;
+
+
+    selectedField.dataset.alignment =
+        this.value;
+
+
+    selectedField.style.textAlign =
+        this.value;
+
+});
+
+
+boldInput.addEventListener("change", function() {
+
+    if (!selectedField) return;
+
+
+    selectedField.dataset.bold =
+        this.checked
+            ? "true"
+            : "false";
+
+
+    selectedField.style.fontWeight =
+        this.checked
+            ? "bold"
+            : "normal";
+
+});
+
+
+/* DELETE */
+
+deleteButton.addEventListener("click", function() {
+
+    if (!selectedField) {
+        return;
+    }
+
+
+    selectedField.remove();
+
+    selectedField = null;
+
+    settings.style.display = "none";
+
+});
+
+
+/* SAVE */
+
+document
+    .getElementById("designer-form")
+    .addEventListener("submit", function() {
+
+        const fields = [];
+
+
+        document
+            .querySelectorAll(".certificate-field")
+            .forEach(function(field) {
+
+                fields.push({
+
+                    id:
+                        field.dataset.id || null,
+
+                    field_type:
+                        field.dataset.fieldType,
+
+                    label:
+                        field.dataset.label || "",
+
+                    x:
+                        parseFloat(field.style.left),
+
+                    y:
+                        parseFloat(field.style.top),
+
+                    width:
+                        parseFloat(field.style.width),
+
+                    height:
+                        parseFloat(field.style.height),
+
+                    font_size:
+                        parseInt(
+                            field.dataset.fontSize || 40
+                        ),
+
+                    alignment:
+                        field.dataset.alignment ||
+                        "center",
+
+                    font_name:
+                        "Arial",
+
+                    is_bold:
+                        field.dataset.bold === "true"
+
+                });
+
+            });
+
+
+        fieldsDataInput.value =
+            JSON.stringify(fields);
+
+    });
+
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,147 @@
+
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <h2 class="mb-4">Generate Certificates</h2>
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    {% if message %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endif %}
+
+
+    {% if certificate_data %}
+        <div class="card mt-4">
+            <div class="card-body">
+
+                <h4 class="mb-4">Certificate Data Preview</h4>
+
+                {% for data in certificate_data %}
+
+                    <div class="border rounded p-3 mb-3">
+
+                        <h5>{{ data.student_name }}</h5>
+
+                        <div>Student ID: {{ data.student_id }}</div>
+
+                        <div>Class: {{ data.class_name }}</div>
+
+                        <div>
+                            Academic Year:
+                            {{ data.academic_year }}
+                        </div>
+
+                        <div>
+                            Total:
+                            {{ data.total }}
+                        </div>
+
+                        <div>
+                            Percentage:
+                            {{ data.percentage|floatformat:2 }}%
+                        </div>
+
+                        <div>
+                            Result:
+                            {{ data.result }}
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+    {% endif %}
+
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Select Classroom
+                    </label>
+
+                    <select
+                        name="classroom"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Choose a classroom
+                        </option>
+
+                        {% for classroom in classrooms %}
+
+                            <option value="{{ classroom.id }}">
+                                {{ classroom.name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Select Certificate Template
+                    </label>
+
+                    <select
+                        name="template"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Choose a template
+                        </option>
+
+                        {% for template in templates %}
+
+                            <option value="{{ template.id }}">
+                                {{ template.name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Generate Certificates
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

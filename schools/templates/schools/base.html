@@ -1111,6 +1111,22 @@
 
             </a>
 
+            <a
+                href="{% url 'certificates:template_list' %}"
+                class="sidebar-link
+                {% if 'certificate' in request.resolver_match.url_name %}
+                    active
+                {% endif %}"
+            >
+
+                <i class="fa-solid fa-certificate"></i>
+
+                <span class="sidebar-link-text">
+                    الشهادات
+                </span>
+
+            </a>
+
 
         </nav>
 

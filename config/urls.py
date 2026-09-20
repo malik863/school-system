@@ -17,12 +17,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from schools.views import landing_page
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
 
     path("", landing_page, name="landing"),
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
+    path(
+        "certificates/",
+        include("certificates.urls")
+    ),
     
     # 1. Include your custom accounts app URLs (login, profile, etc.)
     path('accounts/', include('accounts.urls')), 
@@ -38,3 +45,7 @@ urlpatterns = [
     include("schools.teacher_urls", namespace="teacher"),
 ),
 ]
+urlpatterns += static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT,
+)
