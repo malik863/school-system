@@ -601,6 +601,94 @@ def academic_year_edit(request, pk):
         {"form": form, "title": "تعديل العام الدراسي", "year": year},
     )
 
+@school_admin_required
+def academic_year_change_current(request, pk):
+    school = request.user.school
+
+    new_year = get_object_or_404(
+        AcademicYear,
+        pk=pk,
+        school=school,
+    )
+
+    current_year = (
+        AcademicYear.objects
+        .filter(
+            school=school,
+            is_current=True,
+        )
+        .first()
+    )
+
+    # العام المحدد هو الحالي بالفعل
+    if new_year.is_current:
+        messages.info(
+            request,
+            "هذا العام الدراسي هو العام الحالي بالفعل.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    if request.method == "POST":
+
+        confirmation = request.POST.get(
+            "confirmation",
+            "",
+        ).strip()
+
+        if confirmation != "تغيير العام":
+            messages.error(
+                request,
+                'للتأكيد، يرجى كتابة "تغيير العام" بشكل صحيح.',
+            )
+
+        else:
+            # إلغاء حالة "الحالي" من العام السابق
+            if current_year:
+                current_year.is_current = False
+                current_year.save(
+                    update_fields=["is_current"]
+                )
+
+            # مهم جداً:
+            # لا نريد أن يبقى ترم من العام السابق
+            # هو الترم الحالي بعد تغيير العام.
+            Term.objects.filter(
+                school=school,
+                is_current=True,
+            ).update(
+                is_current=False
+            )
+
+            # جعل العام الجديد هو العام الحالي
+            new_year.is_current = True
+            new_year.save(
+                update_fields=["is_current"]
+            )
+
+            messages.success(
+                request,
+                (
+                    f"تم تغيير العام الدراسي الحالي إلى "
+                    f"{new_year.name} بنجاح. "
+                    "يرجى الآن تحديد الترم الحالي لهذا العام."
+                ),
+            )
+
+            return redirect(
+                "manager:academic_year_list"
+            )
+
+    return render(
+        request,
+        "schools/academic/year_change_current.html",
+        {
+            "current_year": current_year,
+            "new_year": new_year,
+        },
+    )
+
 
 @school_admin_required
 def academic_year_delete(request, pk):
@@ -610,17 +698,56 @@ def academic_year_delete(request, pk):
         school=request.user.school,
     )
 
+    # لا يمكن حذف العام الدراسي الحالي
+    if year.is_current:
+        messages.error(
+            request,
+            "لا يمكن حذف العام الدراسي الحالي. قم بتغيير العام الدراسي الحالي أولاً.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # لا يمكن حذف عام يحتوي على ترمات
+    if year.terms.exists():
+        messages.error(
+            request,
+            "لا يمكن حذف هذا العام الدراسي لأنه يحتوي على ترمات محفوظة.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # لا يمكن حذف عام يحتوي على فصول
+    if year.classrooms.exists():
+        messages.error(
+            request,
+            "لا يمكن حذف هذا العام الدراسي لأنه يحتوي على فصول محفوظة.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # العام فارغ تماماً ويمكن حذفه
     if request.method == "POST":
         year.delete()
-        messages.success(request, "تم حذف العام الدراسي بنجاح.")
-        return redirect("manager:academic_year_list")
+
+        messages.success(
+            request,
+            "تم حذف العام الدراسي بنجاح.",
+        )
+
+        return redirect(
+            "manager:academic_year_list"
+        )
 
     return render(
         request,
         "schools/academic/year_confirm_delete.html",
-        {"year": year},
+        {
+            "year": year,
+        },
     )
-
 
 # ============================================================
 # TERMS
@@ -671,6 +798,130 @@ def term_edit(request, pk):
 
 
 @school_admin_required
+def term_change_current(request, pk):
+    school = request.user.school
+
+    # الترم الذي يريد المدير جعله حالياً
+    new_term = get_object_or_404(
+        Term.objects.select_related("academic_year"),
+        pk=pk,
+        school=school,
+    )
+
+    # العام الدراسي الحالي
+    current_year = (
+        AcademicYear.objects
+        .filter(
+            school=school,
+            is_current=True,
+        )
+        .first()
+    )
+
+    # يجب وجود عام دراسي حالي أولاً
+    if not current_year:
+        messages.error(
+            request,
+            "لا يوجد عام دراسي حالي. يرجى تحديد العام الدراسي الحالي أولاً.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # لا يمكن اختيار ترم من عام دراسي آخر
+    if new_term.academic_year_id != current_year.id:
+        messages.error(
+            request,
+            "لا يمكن جعل هذا الترم حالياً لأنه لا يتبع العام الدراسي الحالي.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # البحث عن الترم الحالي
+    current_term = (
+        Term.objects
+        .filter(
+            school=school,
+            is_current=True,
+        )
+        .select_related("academic_year")
+        .first()
+    )
+
+    # إذا كان الترم هو الحالي بالفعل
+    if new_term.is_current:
+        messages.info(
+            request,
+            "هذا الترم هو الترم الحالي بالفعل.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # لا يمكن إعادة فتح ترم مغلق بهذه الطريقة
+    if new_term.is_closed:
+        messages.error(
+            request,
+            "لا يمكن جعل ترم مغلق هو الترم الحالي.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    if request.method == "POST":
+        confirmation = request.POST.get(
+            "confirmation",
+            "",
+        ).strip()
+
+        if confirmation != "تغيير الترم":
+            messages.error(
+                request,
+                'للتأكيد، يرجى كتابة "تغيير الترم" بشكل صحيح.',
+            )
+
+        else:
+            # إغلاق الترم الحالي السابق
+            if current_term:
+                current_term.is_current = False
+                current_term.is_closed = True
+                current_term.save(
+                    update_fields=[
+                        "is_current",
+                        "is_closed",
+                    ]
+                )
+
+            # جعل الترم الجديد هو الترم الحالي
+            new_term.is_current = True
+            new_term.is_closed = False
+            new_term.save(
+                update_fields=[
+                    "is_current",
+                    "is_closed",
+                ]
+            )
+
+            messages.success(
+                request,
+                f"تم تغيير الترم الحالي إلى {new_term.name} بنجاح.",
+            )
+
+            return redirect(
+                "manager:academic_year_list"
+            )
+
+    return render(
+        request,
+        "schools/academic/term_change_current.html",
+        {
+            "current_term": current_term,
+            "current_year": current_year,
+            "new_term": new_term,
+        },
+    )
+@school_admin_required
 def term_delete(request, pk):
     term = get_object_or_404(
         Term,
@@ -678,18 +929,56 @@ def term_delete(request, pk):
         school=request.user.school,
     )
 
+    # لا يمكن حذف الترم الحالي
+    if term.is_current:
+        messages.error(
+            request,
+            "لا يمكن حذف الترم الحالي. قم بتغيير الترم الحالي أولاً.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # لا يمكن حذف ترم يحتوي على تقييمات
+    if term.assessments.exists():
+        messages.error(
+            request,
+            "لا يمكن حذف هذا الترم لأنه يحتوي على تقييمات أو درجات محفوظة.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # لا يمكن حذف ترم يحتوي على سجلات حضور
+    if term.attendance_records.exists():
+        messages.error(
+            request,
+            "لا يمكن حذف هذا الترم لأنه يحتوي على سجلات حضور محفوظة.",
+        )
+        return redirect(
+            "manager:academic_year_list"
+        )
+
+    # إذا وصلنا هنا فالترم فارغ ويمكن حذفه بأمان
     if request.method == "POST":
         term.delete()
-        messages.success(request, "تم حذف الترم بنجاح.")
-        return redirect("manager:academic_year_list")
+
+        messages.success(
+            request,
+            "تم حذف الترم بنجاح.",
+        )
+
+        return redirect(
+            "manager:academic_year_list"
+        )
 
     return render(
         request,
         "schools/academic/term_confirm_delete.html",
-        {"term": term},
+        {
+            "term": term,
+        },
     )
-
-
 
 
 # ============================================================
@@ -1279,7 +1568,7 @@ def teacher_student_detail(request, student_id):
     attendance_records = Attendance.objects.filter(
         school=school,
         student=student,
-        classroom=classroom,
+        
     )
 
     total_attendance = attendance_records.count()
@@ -1469,7 +1758,7 @@ def teacher_student_subject_detail(request, student_id, assignment_id):
     attendance_records = Attendance.objects.filter(
         school=school,
         student=student,
-        classroom=classroom,
+        
     )
 
     total_attendance = attendance_records.count()

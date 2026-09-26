@@ -20,7 +20,6 @@ class AssessmentForm(forms.ModelForm):
         fields = [
             "classroom",
             "subject",
-            "term",
             "title",
             "assessment_type",
             "max_score",
@@ -34,9 +33,7 @@ class AssessmentForm(forms.ModelForm):
             "subject": forms.Select(
                 attrs={"class": "form-select"}
             ),
-            "term": forms.Select(
-                attrs={"class": "form-select"}
-            ),
+
             "title": forms.TextInput(
                 attrs={
                     "class": "form-control",
@@ -64,7 +61,7 @@ class AssessmentForm(forms.ModelForm):
         labels = {
             "classroom": "الفصل",
             "subject": "المادة",
-            "term": "الترم",
+            
             "title": "اسم التقييم",
             "assessment_type": "نوع التقييم",
             "max_score": "الدرجة النهائية",
@@ -129,17 +126,7 @@ class AssessmentForm(forms.ModelForm):
         # Terms belonging to the school's academic years.
         # -------------------------------------------------
 
-        self.fields["term"].queryset = (
-            Term.objects
-            .filter(
-                school=school,
-            )
-            .select_related("academic_year")
-            .order_by(
-                "-academic_year__start_date",
-                "start_date",
-            )
-        )
+
 
         # -------------------------------------------------
         # When editing an existing assessment,
@@ -155,23 +142,39 @@ class AssessmentForm(forms.ModelForm):
                 self.instance.subject_id
             )
 
-            self.fields["term"].initial = (
-                self.instance.term_id
-            )
+
 
     def clean(self):
         cleaned_data = super().clean()
-
         classroom = cleaned_data.get("classroom")
         subject = cleaned_data.get("subject")
-        term = cleaned_data.get("term")
         assessment_type = cleaned_data.get(
             "assessment_type"
         )
 
-        if not classroom or not subject or not term:
+        # When editing, keep the assessment's original term.
+        # When creating, automatically use the school's current term.
+        if self.instance.pk:
+            term = self.instance.term
+        else:
+            term = (
+                Term.objects
+                .filter(
+                    school=self.school,
+                    is_current=True,
+                    is_closed=False,
+                )
+                .select_related("academic_year")
+                .first()
+            )
+
+        if not classroom or not subject:
             return cleaned_data
 
+        if not term:
+            raise ValidationError(
+                "لا يوجد ترم حالي مفتوح للمدرسة. يرجى تحديد الترم الحالي أولاً."
+            )
         # -------------------------------------------------
         # 1. Verify classroom belongs to teacher assignment.
         # -------------------------------------------------

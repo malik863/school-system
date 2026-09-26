@@ -50,6 +50,16 @@ urlpatterns = [
     path("academic/term/<int:pk>/edit/", views.term_edit, name="term_edit"),
     path("academic/term/<int:pk>/delete/", views.term_delete, name="term_delete"),
 
+    path(
+        "terms/<int:pk>/change-current/",
+        views.term_change_current,
+        name="term_change_current",
+    ),
+    path(
+        "academic-years/<int:pk>/change-current/",
+        views.academic_year_change_current,
+        name="academic_year_change_current",
+    ),
         # Teaching Assignments
     path(
         "assignments/",

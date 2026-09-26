@@ -9,7 +9,9 @@ from students.models import StudentProfile
 from .forms import AssessmentForm
 from .models import Assessment, Grade
 from schools.decorators import teacher_required
-
+from django.db.models import Exists, OuterRef
+from django.db import transaction
+from schools.models import Term
 
 @login_required
 @teacher_required
@@ -17,20 +19,29 @@ def assessment_list(request):
     teacher = request.user
     school = teacher.school
 
+    current_assignment = TeachingAssignment.objects.filter(
+        school=school,
+        teacher=teacher,
+        classroom=OuterRef("classroom"),
+        subject=OuterRef("subject"),
+    )
+
     assessments = (
         Assessment.objects
+        .filter(school=school)
+        .annotate(
+            teacher_has_assignment=Exists(current_assignment)
+        )
         .filter(
-            school=school,
-            classroom__teaching_assignments__teacher=teacher,
-            subject__teaching_assignments__teacher=teacher,
+            teacher_has_assignment=True
         )
         .select_related(
             "classroom",
             "subject",
             "term",
             "term__academic_year",
+            "created_by",
         )
-        .distinct()
         .order_by("-date", "-id")
     )
 
@@ -57,11 +68,29 @@ def assessment_create(request):
         )
 
         if form.is_valid():
+            current_term = (
+                Term.objects
+                .filter(
+                    school=school,
+                    is_current=True,
+                    is_closed=False,
+                )
+                .select_related("academic_year")
+                .first()
+            )
+
+            if not current_term:
+                messages.error(
+                    request,
+                    "لا يوجد ترم حالي مفتوح. يرجى التواصل مع مدير المدرسة.",
+                )
+                return redirect("teacher:assessment_create")
+
             assessment = form.save(commit=False)
             assessment.school = school
             assessment.created_by = teacher
+            assessment.term = current_term
             assessment.save()
-
             messages.success(
                 request,
                 "تم إنشاء التقييم بنجاح.",
@@ -105,13 +134,20 @@ def assessment_edit(request, pk):
 
     # Only the teacher who created the assessment
     # can edit it.
-    if assessment.created_by_id != teacher.id:
+
+    assignment_exists = TeachingAssignment.objects.filter(
+        school=school,
+        teacher=teacher,
+        classroom=assessment.classroom,
+        subject=assessment.subject,
+    ).exists()
+
+    if not assignment_exists:
         messages.error(
             request,
-            "لا يمكنك تعديل هذا التقييم.",
+            "لا يمكنك تعديل هذا التقييم لأنك لم تعد تدرس هذه المادة لهذا الفصل.",
         )
         return redirect("teacher:assessment_list")
-
     if request.method == "POST":
         form = AssessmentForm(
             request.POST,
@@ -164,13 +200,21 @@ def assessment_delete(request, pk):
         school=school,
     )
 
-    if assessment.created_by_id != teacher.id:
+   
+    assignment_exists = TeachingAssignment.objects.filter(
+        school=school,
+        teacher=teacher,
+        classroom=assessment.classroom,
+        subject=assessment.subject,
+    ).exists()
+
+    if not assignment_exists:
         messages.error(
             request,
-            "لا يمكنك حذف هذا التقييم.",
+            "لا يمكنك حذف هذا التقييم لأنك لم تعد تدرس هذه المادة لهذا الفصل.",
         )
         return redirect("teacher:assessment_list")
-
+    
     if request.method == "POST":
         assessment.delete()
 
@@ -210,6 +254,7 @@ def assessment_detail(request, pk):
 
     # The teacher must actually teach this
     # classroom + subject combination.
+
     assignment_exists = TeachingAssignment.objects.filter(
         school=school,
         teacher=teacher,
@@ -223,7 +268,6 @@ def assessment_detail(request, pk):
             "لا يمكنك الوصول إلى هذا التقييم.",
         )
         return redirect("teacher:assessment_list")
-
     students = (
         StudentProfile.objects
         .filter(
@@ -278,6 +322,7 @@ def assessment_grades(request, pk):
         school=school,
     )
 
+
     assignment_exists = TeachingAssignment.objects.filter(
         school=school,
         teacher=teacher,
@@ -291,7 +336,6 @@ def assessment_grades(request, pk):
             "لا يمكنك تسجيل درجات هذا التقييم.",
         )
         return redirect("teacher:assessment_list")
-
     students = (
         StudentProfile.objects
         .filter(

@@ -87,7 +87,7 @@
                                             عرض
                                         </a>
 
-                                        {% if assessment.created_by_id == request.user.id %}
+                                        {% if assessment.classroom.teaching_assignments.all %}
 
                                             <a href="{% url 'teacher:assessment_edit' assessment.pk %}"
                                                class="btn btn-sm btn-outline-secondary">

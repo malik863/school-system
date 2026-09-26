@@ -578,20 +578,39 @@ class StudentUpdateForm(forms.ModelForm):
 class AcademicYearForm(BaseSchoolForm):
     class Meta:
         model = AcademicYear
-        fields = ["name", "start_date", "end_date", "is_current"]
+
+        fields = [
+            "name",
+            "start_date",
+            "end_date",
+        ]
+
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "مثال: 2026/2027"}),
-            "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "end_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "is_current": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "مثال: 2026/2027",
+                }
+            ),
+            "start_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+            "end_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
         }
+
         labels = {
             "name": "اسم العام الدراسي",
             "start_date": "تاريخ البداية",
             "end_date": "تاريخ النهاية",
-            "is_current": "العام الحالي",
         }
-
 
 # =========================================================
 # TERMS
@@ -604,8 +623,6 @@ class TermForm(BaseSchoolForm):
             "name",
             "start_date",
             "end_date",
-            "is_current",
-            "is_closed",
         ]
         widgets = {
             "academic_year": forms.Select(
@@ -629,20 +646,14 @@ class TermForm(BaseSchoolForm):
                     "type": "date",
                 }
             ),
-            "is_current": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
-            ),
-            "is_closed": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
-            ),
+
         }
         labels = {
             "academic_year": "العام الدراسي",
             "name": "اسم الترم",
             "start_date": "تاريخ البداية",
             "end_date": "تاريخ النهاية",
-            "is_current": "الترم الحالي",
-            "is_closed": "مغلق",
+
         }
 
     def __init__(self, *args, **kwargs):

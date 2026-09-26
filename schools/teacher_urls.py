@@ -27,10 +27,6 @@ urlpatterns = [
         name="attendance",
     ),
 
-    path(
-    "assessments/",
-    include("assessments.urls"),
-    ),
 
 
     
