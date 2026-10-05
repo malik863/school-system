@@ -1,0 +1,1413 @@
+{% extends "schools/base.html" %}
+
+{% block title %}
+لوحة التحكم | إدارة المدرسة
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    /* =========================================================
+       MANAGER DASHBOARD
+    ========================================================= */
+
+    .manager-dashboard {
+        padding-bottom: 20px;
+    }
+
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .dashboard-header h1 {
+        margin: 0 0 7px;
+        font-size: 27px;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .dashboard-header p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+
+    .academic-period {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .period-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 13px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .period-badge i {
+        color: var(--primary);
+    }
+
+
+    /* =========================================================
+       TOP STAT CARDS
+    ========================================================= */
+
+    .dashboard-stat-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        height: 100%;
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease,
+            border-color .2s ease;
+    }
+
+    .dashboard-stat-card:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+        box-shadow:
+            0 8px 25px rgba(15, 23, 42, .06);
+    }
+
+    .dashboard-stat-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .dashboard-stat-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-muted);
+        margin-bottom: 9px;
+    }
+
+    .dashboard-stat-number {
+        font-size: 30px;
+        line-height: 1;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 9px;
+    }
+
+    .dashboard-stat-description {
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .dashboard-stat-icon {
+        width: 45px;
+        height: 45px;
+        flex-shrink: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 13px;
+
+        background: #eff6ff;
+        color: var(--primary);
+
+        font-size: 18px;
+    }
+
+    .dashboard-stat-icon.green {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .dashboard-stat-icon.orange {
+        background: #fff7ed;
+        color: #ea580c;
+    }
+
+    .dashboard-stat-icon.purple {
+        background: #faf5ff;
+        color: #9333ea;
+    }
+
+
+    /* =========================================================
+       PERFORMANCE CARDS
+    ========================================================= */
+
+    .performance-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 23px;
+        height: 100%;
+    }
+
+    .performance-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .performance-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .performance-icon {
+        width: 42px;
+        height: 42px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 12px;
+
+        background: #eff6ff;
+        color: var(--primary);
+
+        font-size: 17px;
+    }
+
+    .performance-icon.warning {
+        background: #fff7ed;
+        color: #ea580c;
+    }
+
+    .performance-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .performance-subtitle {
+        margin-top: 3px;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .performance-big-number {
+        font-size: 36px;
+        line-height: 1;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+    }
+
+    .performance-note {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+
+    /* =========================================================
+       PROGRESS BAR
+    ========================================================= */
+
+    .dashboard-progress {
+        width: 100%;
+        height: 7px;
+        background: #f1f5f9;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 18px;
+    }
+
+    .dashboard-progress-bar {
+        height: 100%;
+        background: var(--primary);
+        border-radius: 20px;
+    }
+
+
+    /* =========================================================
+       ATTENTION CARD
+    ========================================================= */
+
+    .attention-counts {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        margin-top: 18px;
+    }
+
+    .attention-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 10px 12px;
+
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .attention-row-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .attention-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ef4444;
+    }
+
+    .attention-dot.orange {
+        background: #f59e0b;
+    }
+
+    .attention-row-number {
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .attention-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+
+        margin-top: 16px;
+
+        color: var(--primary);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .attention-link:hover {
+        color: var(--primary-dark);
+    }
+
+
+    /* =========================================================
+       CHART CARDS
+    ========================================================= */
+
+    .chart-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .chart-card-header {
+        padding: 20px 22px 16px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .chart-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .chart-description {
+        margin-top: 5px;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    .chart-card-body {
+        padding: 20px;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 310px;
+        width: 100%;
+    }
+
+    .class-chart-wrapper {
+        position: relative;
+        min-height: 310px;
+        width: 100%;
+    }
+
+
+    /* =========================================================
+       EMPTY CHART
+    ========================================================= */
+
+    .dashboard-empty {
+        min-height: 280px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        text-align: center;
+
+        color: var(--text-muted);
+    }
+
+    .dashboard-empty-icon {
+        width: 55px;
+        height: 55px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-bottom: 13px;
+
+        border-radius: 50%;
+
+        background: #f1f5f9;
+        color: #94a3b8;
+
+        font-size: 20px;
+    }
+
+    .dashboard-empty-title {
+        color: #475569;
+        font-weight: 800;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .dashboard-empty-text {
+        font-size: 12px;
+    }
+
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
+    @media (max-width: 767px) {
+
+        .dashboard-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .dashboard-header h1 {
+            font-size: 23px;
+        }
+
+        .dashboard-stat-card {
+            padding: 16px;
+        }
+
+        .dashboard-stat-number {
+            font-size: 26px;
+        }
+
+        .dashboard-stat-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .performance-card {
+            padding: 18px;
+        }
+
+        .performance-big-number {
+            font-size: 31px;
+        }
+
+        .chart-wrapper {
+            height: 270px;
+        }
+    }
+
+</style>
+
+
+<div class="manager-dashboard">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h1>
+                لوحة التحكم
+            </h1>
+
+            <p>
+                نظرة عامة على أداء
+                <strong>{{ request.user.school.name }}</strong>
+            </p>
+
+        </div>
+
+
+        <div class="academic-period">
+
+            {% if current_year %}
+
+                <div class="period-badge">
+
+                    <i class="fa-solid fa-calendar-days"></i>
+
+                    {{ current_year.name }}
+
+                </div>
+
+            {% endif %}
+
+
+            {% if current_term %}
+
+                <div class="period-badge">
+
+                    <i class="fa-solid fa-clock"></i>
+
+                    {{ current_term.name }}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAIN STATISTICS
+    ====================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- STUDENTS -->
+
+        <div class="col-6 col-xl-3">
+
+            <a href="{% url 'manager:student_list' %}">
+
+                <div class="dashboard-stat-card">
+
+                    <div class="dashboard-stat-header">
+
+                        <div>
+
+                            <div class="dashboard-stat-label">
+                                الطلاب
+                            </div>
+
+                            <div class="dashboard-stat-number">
+                                {{ total_students }}
+                            </div>
+
+                            <div class="dashboard-stat-description">
+                                طالب نشط
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-stat-icon">
+
+                            <i class="fa-solid fa-user-graduate"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- TEACHERS -->
+
+        <div class="col-6 col-xl-3">
+
+            <a href="{% url 'manager:teacher_list' %}">
+
+                <div class="dashboard-stat-card">
+
+                    <div class="dashboard-stat-header">
+
+                        <div>
+
+                            <div class="dashboard-stat-label">
+                                المعلمون
+                            </div>
+
+                            <div class="dashboard-stat-number">
+                                {{ total_teachers }}
+                            </div>
+
+                            <div class="dashboard-stat-description">
+                                معلم نشط
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-stat-icon green">
+
+                            <i class="fa-solid fa-chalkboard-user"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- CLASSES -->
+
+        <div class="col-6 col-xl-3">
+
+            <a href="{% url 'manager:class_list' %}">
+
+                <div class="dashboard-stat-card">
+
+                    <div class="dashboard-stat-header">
+
+                        <div>
+
+                            <div class="dashboard-stat-label">
+                                الفصول
+                            </div>
+
+                            <div class="dashboard-stat-number">
+                                {{ total_classes }}
+                            </div>
+
+                            <div class="dashboard-stat-description">
+                                فصل دراسي
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-stat-icon purple">
+
+                            <i class="fa-solid fa-door-open"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+
+        <!-- TODAY ATTENDANCE -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="dashboard-stat-card">
+
+                <div class="dashboard-stat-header">
+
+                    <div>
+
+                        <div class="dashboard-stat-label">
+                            حضور اليوم
+                        </div>
+
+
+                        <div class="dashboard-stat-number">
+
+                            {% if attendance_today_percentage is not None %}
+
+                                {{ attendance_today_percentage }}%
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="dashboard-stat-description">
+
+                            {% if today_recorded %}
+
+                                {{ today_present }}
+                                حاضر من
+                                {{ today_recorded }}
+                                مسجل
+
+                            {% else %}
+
+                                لم يتم تسجيل الحضور بعد
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-stat-icon orange">
+
+                        <i class="fa-solid fa-calendar-check"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ACADEMIC PERFORMANCE + ATTENTION
+    ====================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- ACADEMIC AVERAGE -->
+
+        <div class="col-lg-6">
+
+            <div class="performance-card">
+
+                <div class="performance-card-header">
+
+                    <div class="performance-title-wrapper">
+
+                        <div class="performance-icon">
+
+                            <i class="fa-solid fa-chart-line"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="performance-title">
+                                متوسط الأداء الأكاديمي
+                            </div>
+
+                            <div class="performance-subtitle">
+                                {% if performance_is_year %}{{ current_year.name }} - العام الدراسي{% elif selected_performance_term %}{{ selected_performance_term.name }}{% else %}لا توجد فترة دراسية{% endif %}
+                            </div>
+                            {% if current_year %}
+                            <form method="get" class="mt-2">
+                                <select name="performance_period" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    {% for term in performance_terms %}<option value="term:{{ term.id }}" {% if not performance_is_year and selected_performance_term.id == term.id %}selected{% endif %}>{{ term.name }}</option>{% endfor %}
+                                    <option value="year" {% if performance_is_year %}selected{% endif %}>العام الدراسي بالكامل</option>
+                                </select>
+                            </form>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {% if academic_average is not None %}
+
+                    <div class="performance-big-number">
+                        {{ academic_average }}%
+                    </div>
+
+
+                    <div class="performance-note">
+                        متوسط الدرجات المسجلة في الفترة المختارة
+                    </div>
+
+
+                    <div class="dashboard-progress">
+
+                        <div
+                            class="dashboard-progress-bar"
+                            style="width: {{ academic_average }}%;"
+                        ></div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="performance-big-number">
+                        —
+                    </div>
+
+                    <div class="performance-note">
+                        لا توجد درجات كافية لحساب المتوسط
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+
+        <!-- STUDENTS NEEDING ATTENTION -->
+
+        <div class="col-lg-6">
+
+            <div class="performance-card">
+
+                <div class="performance-card-header">
+
+                    <div class="performance-title-wrapper">
+
+                        <div class="performance-icon warning">
+
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="performance-title">
+                                طلاب يحتاجون متابعة
+                            </div>
+
+                            <div class="performance-subtitle">
+                                حسب الأداء والحضور في الترم الحالي
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="performance-big-number">
+                    {{ students_needing_attention }}
+                    <span style="font-size: 15px; font-weight: 700;">
+                        طالب
+                    </span>
+                </div>
+
+
+                <div class="attention-counts">
+
+
+                    <div class="attention-row">
+
+                        <div class="attention-row-label">
+
+                            <span class="attention-dot"></span>
+
+                            تحصيل دراسي أقل من
+                            {{ low_academic_threshold }}%
+
+                        </div>
+
+                        <div class="attention-row-number">
+                            {{ low_academic_count }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="attention-row">
+
+                        <div class="attention-row-label">
+
+                            <span class="attention-dot orange"></span>
+
+                            حضور أقل من
+                            {{ low_attendance_threshold }}%
+
+                        </div>
+
+                        <div class="attention-row-number">
+                            {{ low_attendance_count }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <a
+                    href="{% url 'manager:student_list' %}"
+                    class="attention-link"
+                >
+
+                    عرض الطلاب
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CHARTS
+    ====================================================== -->
+
+    <div class="row g-3">
+
+
+        <!-- ATTENDANCE TREND -->
+
+        <div class="col-xl-7">
+
+            <div class="chart-card">
+
+                <div class="chart-card-header">
+
+                    <h2 class="chart-title">
+                        الحضور خلال آخر 30 يوم
+                    </h2>
+
+                    <div class="chart-description">
+                        نسبة الحضور في الأيام التي تم تسجيل الحضور فيها
+                    </div>
+
+                </div>
+
+
+                <div class="chart-card-body">
+
+                    {% if attendance_chart_values %}
+
+                        <div class="chart-wrapper">
+
+                            <canvas id="attendanceChart"></canvas>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="dashboard-empty">
+
+                            <div class="dashboard-empty-icon">
+
+                                <i class="fa-solid fa-chart-line"></i>
+
+                            </div>
+
+                            <div class="dashboard-empty-title">
+                                لا توجد بيانات حضور
+                            </div>
+
+                            <div class="dashboard-empty-text">
+                                سيظهر الرسم بعد تسجيل الحضور
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CLASS PERFORMANCE -->
+
+        <div class="col-xl-5">
+
+            <div class="chart-card">
+
+                <div class="chart-card-header">
+
+                    <h2 class="chart-title">
+                        متوسط أداء الفصول
+                    </h2>
+
+                    <div class="chart-description">
+                        مقارنة الأداء الأكاديمي للفصول في الترم الحالي
+                    </div>
+
+                </div>
+
+
+                <div class="chart-card-body">
+
+                    {% if classroom_chart_values %}
+
+                        <div
+                            class="class-chart-wrapper"
+                            style="height: {% widthratio classroom_chart_labels|length 1 55 %}px; min-height: 310px;"
+                        >
+
+                            <canvas id="classPerformanceChart"></canvas>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="dashboard-empty">
+
+                            <div class="dashboard-empty-icon">
+
+                                <i class="fa-solid fa-chart-column"></i>
+
+                            </div>
+
+                            <div class="dashboard-empty-title">
+                                لا توجد بيانات أداء
+                            </div>
+
+                            <div class="dashboard-empty-text">
+                                ستظهر مقارنة الفصول بعد إدخال الدرجات
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SAFE JSON DATA FOR CHARTS
+========================================================== -->
+
+{{ attendance_chart_labels|json_script:"attendance-labels" }}
+{{ attendance_chart_values|json_script:"attendance-values" }}
+
+{{ classroom_chart_labels|json_script:"classroom-labels" }}
+{{ classroom_chart_values|json_script:"classroom-values" }}
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
+></script>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    /* =========================================================
+       ATTENDANCE CHART
+    ========================================================= */
+
+    const attendanceCanvas =
+        document.getElementById("attendanceChart");
+
+
+    if (attendanceCanvas) {
+
+        const attendanceLabels = JSON.parse(
+            document.getElementById(
+                "attendance-labels"
+            ).textContent
+        );
+
+        const attendanceValues = JSON.parse(
+            document.getElementById(
+                "attendance-values"
+            ).textContent
+        );
+
+
+        const attendanceContext =
+            attendanceCanvas.getContext("2d");
+
+
+        const attendanceGradient =
+            attendanceContext.createLinearGradient(
+                0,
+                0,
+                0,
+                300
+            );
+
+
+        attendanceGradient.addColorStop(
+            0,
+            "rgba(37, 99, 235, 0.22)"
+        );
+
+        attendanceGradient.addColorStop(
+            1,
+            "rgba(37, 99, 235, 0.01)"
+        );
+
+
+        new Chart(
+            attendanceCanvas,
+            {
+                type: "line",
+
+                data: {
+                    labels: attendanceLabels,
+
+                    datasets: [
+                        {
+                            label: "نسبة الحضور",
+
+                            data: attendanceValues,
+
+                            borderColor: "#2563eb",
+
+                            backgroundColor:
+                                attendanceGradient,
+
+                            fill: true,
+
+                            borderWidth: 2.5,
+
+                            tension: 0.35,
+
+                            pointRadius: 3,
+
+                            pointHoverRadius: 6,
+
+                            pointBackgroundColor:
+                                "#2563eb",
+
+                            pointBorderColor:
+                                "#ffffff",
+
+                            pointBorderWidth: 2,
+                        }
+                    ]
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        intersect: false,
+                        mode: "index",
+                    },
+
+                    plugins: {
+
+                        legend: {
+                            display: false,
+                        },
+
+                        tooltip: {
+
+                            rtl: true,
+
+                            callbacks: {
+
+                                label: function(context) {
+
+                                    return (
+                                        " الحضور: "
+                                        + context.parsed.y
+                                        + "%"
+                                    );
+
+                                }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            min: 0,
+
+                            max: 100,
+
+                            ticks: {
+
+                                callback: function(value) {
+                                    return value + "%";
+                                },
+
+                                color: "#64748b",
+
+                                font: {
+                                    size: 11,
+                                }
+
+                            },
+
+                            grid: {
+                                color:
+                                    "rgba(226,232,240,.7)",
+                            },
+
+                            border: {
+                                display: false,
+                            }
+
+                        },
+
+                        x: {
+
+                            ticks: {
+
+                                color: "#64748b",
+
+                                maxRotation: 0,
+
+                                font: {
+                                    size: 10,
+                                }
+
+                            },
+
+                            grid: {
+                                display: false,
+                            },
+
+                            border: {
+                                display: false,
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    /* =========================================================
+       CLASS PERFORMANCE CHART
+    ========================================================= */
+
+    const classCanvas =
+        document.getElementById(
+            "classPerformanceChart"
+        );
+
+
+    if (classCanvas) {
+
+        const classroomLabels = JSON.parse(
+            document.getElementById(
+                "classroom-labels"
+            ).textContent
+        );
+
+        const classroomValues = JSON.parse(
+            document.getElementById(
+                "classroom-values"
+            ).textContent
+        );
+
+
+        new Chart(
+            classCanvas,
+            {
+                type: "bar",
+
+                data: {
+
+                    labels: classroomLabels,
+
+                    datasets: [
+                        {
+                            label: "متوسط الأداء",
+
+                            data: classroomValues,
+
+                            backgroundColor:
+                                "rgba(37, 99, 235, 0.82)",
+
+                            borderRadius: 7,
+
+                            borderSkipped: false,
+
+                            barThickness: 18,
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    indexAxis: "y",
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+                            display: false,
+                        },
+
+                        tooltip: {
+
+                            rtl: true,
+
+                            callbacks: {
+
+                                label: function(context) {
+
+                                    return (
+                                        " المتوسط: "
+                                        + context.parsed.x
+                                        + "%"
+                                    );
+
+                                }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales: {
+
+                        x: {
+
+                            beginAtZero: true,
+
+                            min: 0,
+
+                            max: 100,
+
+                            ticks: {
+
+                                callback: function(value) {
+                                    return value + "%";
+                                },
+
+                                color: "#64748b",
+
+                                font: {
+                                    size: 11,
+                                }
+
+                            },
+
+                            grid: {
+                                color:
+                                    "rgba(226,232,240,.7)",
+                            },
+
+                            border: {
+                                display: false,
+                            }
+
+                        },
+
+                        y: {
+
+                            ticks: {
+
+                                color: "#475569",
+
+                                font: {
+                                    size: 11,
+                                    weight: "600",
+                                }
+
+                            },
+
+                            grid: {
+                                display: false,
+                            },
+
+                            border: {
+                                display: false,
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

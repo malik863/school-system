@@ -1,0 +1,91 @@
+
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">
+        {{ title }}
+    </h2>
+
+    <div class="alert alert-info">
+
+        النظام الأكاديمي:
+
+        <strong>
+            {{ scheme.name }}
+        </strong>
+
+    </div>
+
+
+    <form method="post">
+
+        {% csrf_token %}
+
+
+        {% if form.non_field_errors %}
+
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+
+        {% endif %}
+
+
+        {% for field in form %}
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.errors %}
+
+                    <div class="text-danger">
+                        {{ field.errors }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+
+        <button type="submit"
+                class="btn btn-primary">
+            حفظ
+        </button>
+
+
+        <a href="{% url 'manager:academic_scheme_edit' scheme.pk %}"
+           class="btn btn-secondary">
+            إلغاء
+        </a>
+
+    </form>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const type = document.getElementById("id_assessment_type");
+    const count = document.getElementById("id_max_count");
+    if (!type || !count) return;
+    const wrapper = count.closest(".mb-3");
+    function syncCount() {
+        const attendance = type.value === "attendance";
+        if (wrapper) wrapper.style.display = attendance ? "none" : "block";
+        count.required = !attendance;
+        if (attendance) count.value = "";
+    }
+    type.addEventListener("change", syncCount);
+    syncCount();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+
+
+{% extends "schools/base.html" %}
+
+
+
+
+{% block content %}
+
+<div class="container py-4" dir="rtl">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7 col-md-9">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <h3 class="mb-4">
+                        تغيير الترم الحالي
+                    </h3>
+
+                    {% if current_term %}
+
+                        <div class="alert alert-secondary">
+
+                            <strong>
+                                الترم الحالي:
+                            </strong>
+
+                            <div class="mt-2">
+                                {{ current_term.name }}
+                                —
+                                {{ current_term.academic_year.name }}
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="alert alert-warning">
+                            لا يوجد ترم حالي محدد حالياً.
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="alert alert-info">
+
+                        <strong>
+                            الترم الجديد:
+                        </strong>
+
+                        <div class="mt-2">
+                            {{ new_term.name }}
+                            —
+                            {{ new_term.academic_year.name }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert alert-warning mt-4">
+
+                        <h5>
+                            تنبيه مهم
+                        </h5>
+
+                        <p class="mb-2">
+                            بعد تأكيد التغيير، سيصبح هذا الترم
+                            هو الترم الحالي للمدرسة.
+                        </p>
+
+                        <p class="mb-2">
+                            سيتم استخدام الترم الجديد تلقائياً
+                            عند إنشاء السجلات الأكاديمية الجديدة.
+                        </p>
+
+                        <p class="mb-0">
+                            لن يتم حذف أو تعديل التقييمات أو
+                            الدرجات أو سجلات الحضور السابقة.
+                        </p>
+
+                    </div>
+
+
+                    <form method="post" class="mt-4">
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            <label
+                                for="confirmation"
+                                class="form-label"
+                            >
+                                للتأكيد، اكتب
+                                <strong>تغيير الترم</strong>
+                            </label>
+
+                            <input
+                                type="text"
+                                name="confirmation"
+                                id="confirmation"
+                                class="form-control"
+                                autocomplete="off"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="d-flex gap-2">
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger"
+                            >
+                                تأكيد تغيير الترم
+                            </button>
+
+                            <a
+                                href="{% url 'manager:academic_year_list' %}"
+                                class="btn btn-secondary"
+                            >
+                                إلغاء
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

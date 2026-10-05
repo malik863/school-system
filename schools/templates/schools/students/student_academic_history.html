@@ -1,0 +1,35 @@
+{% extends "schools/base.html" %}
+{% block title %}السجل الأكاديمي - {{ student }}{% endblock %}
+{% block content %}
+<div class="container py-4" dir="rtl">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div><h3 class="mb-1">السجل الأكاديمي - {{ student }}</h3><div class="text-muted">عرض تاريخي للمدير فقط. لا يغيّر الفصل الحالي أو أي سجل محفوظ.</div></div>
+    <a class="btn btn-outline-secondary" href="{% url 'manager:student_list' %}">العودة للطلاب</a>
+  </div>
+  {% if enrollments %}
+  <form method="get" class="card card-body mb-4">
+    <label class="form-label fw-semibold">العام الدراسي</label>
+    <select name="year" class="form-select" onchange="this.form.submit()">
+      {% for enrollment in enrollments %}<option value="{{ enrollment.academic_year_id }}" {% if selected_enrollment and enrollment.academic_year_id == selected_enrollment.academic_year_id %}selected{% endif %}>{{ enrollment.academic_year.name }} — {{ enrollment.classroom }}</option>{% endfor %}
+    </select>
+  </form>
+  {% if selected_enrollment %}
+  <div class="alert alert-light border"><strong>الفصل في هذا العام:</strong> {{ selected_enrollment.classroom }} &nbsp; | &nbsp; <strong>العام:</strong> {{ selected_enrollment.academic_year.name }}</div>
+  <div class="card mb-4"><div class="card-header fw-bold">النتيجة السنوية</div><div class="card-body">
+    {% if annual_result.percentage is not None %}<span class="fs-4">{{ annual_result.score|floatformat:-2 }} / {{ annual_result.max_score|floatformat:-2 }}</span> <span class="text-muted">({{ annual_result.percentage|floatformat:1 }}%)</span>{% else %}<span class="text-muted">لا توجد نتيجة محسوبة لهذا العام.</span>{% endif %}
+  </div></div>
+  <div class="card mb-4"><div class="card-header fw-bold">المواد والدرجات</div><div class="card-body">
+    {% for item in subjects %}<div class="border rounded p-3 mb-3"><h5>{{ item.subject.name }}</h5>
+      {% for term_id, td in item.terms.items %}<div class="mb-2"><strong>{{ td.term.name }}:</strong> {% if td.result.percentage is not None %}{{ td.result.score|floatformat:-2 }} / {{ td.result.max_score|floatformat:-2 }} ({{ td.result.percentage|floatformat:1 }}%){% else %}-{% endif %}</div>{% endfor %}
+      {% if item.year.percentage is not None %}<div><strong>السنوي:</strong> {{ item.year.score|floatformat:-2 }} / {{ item.year.max_score|floatformat:-2 }} ({{ item.year.percentage|floatformat:1 }}%)</div>{% endif %}
+    </div>{% empty %}<div class="text-muted">لا توجد درجات محفوظة لهذا العام.</div>{% endfor %}
+  </div></div>
+  <div class="card mb-4"><div class="card-header fw-bold">الحضور</div><div class="card-body">
+    {% if attendance_stats %}<div class="row g-2 mb-3"><div class="col">إجمالي: {{ attendance_stats.total }}</div><div class="col">حاضر: {{ attendance_stats.present }}</div><div class="col">غائب: {{ attendance_stats.absent }}</div><div class="col">متأخر: {{ attendance_stats.late }}</div><div class="col">بعذر: {{ attendance_stats.excused }}</div><div class="col">النسبة: {{ attendance_stats.percentage|default:"-" }}%</div></div>{% endif %}
+    {% if attendance_records %}<div class="table-responsive"><table class="table table-sm"><thead><tr><th>التاريخ</th><th>الترم</th><th>الحالة</th></tr></thead><tbody>{% for record in attendance_records %}<tr><td>{{ record.date }}</td><td>{{ record.term.name }}</td><td>{{ record.get_status_display }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="text-muted">لا توجد سجلات حضور لهذا العام.</div>{% endif %}
+  </div></div>
+  <a class="btn btn-outline-primary" href="{% url 'certificates:certificate_generation' %}">الشهادات</a>
+  {% endif %}
+  {% else %}<div class="alert alert-info">لا يوجد سجل أكاديمي محفوظ لهذا الطالب حتى الآن.</div>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>الاختبارات والمشاريع</h2>
+            <p class="text-muted">
+                إدارة الاختبارات والمشاريع الخاصة بالمواد والفصول المسندة إليك.
+            </p>
+        </div>
+
+        <a href="{% url 'teacher:assessment_create' %}"
+           class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            إنشاء تقييم
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">الفصل</label>
+                    <select name="classroom" class="form-select">
+                        <option value="">كل الفصول</option>
+                        {% for classroom in classrooms %}
+                            <option value="{{ classroom.pk }}" {% if selected_classroom == classroom.pk|stringformat:"s" %}selected{% endif %}>{{ classroom.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">المادة</label>
+                    <select name="subject" class="form-select">
+                        <option value="">كل المواد</option>
+                        {% for subject in subjects %}
+                            <option value="{{ subject.pk }}" {% if selected_subject == subject.pk|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">الترم</label>
+                    <select name="term" class="form-select">
+                        <option value="">كل الترمات</option>
+                        {% for term in terms %}
+                            <option value="{{ term.pk }}" {% if selected_term == term.pk|stringformat:"s" %}selected{% endif %}>{{ term }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">النوع</label>
+                    <select name="type" class="form-select">
+                        <option value="">الكل</option>
+                        <option value="exam" {% if selected_type == "exam" %}selected{% endif %}>اختبار</option>
+                        <option value="project" {% if selected_type == "project" %}selected{% endif %}>مشروع</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary flex-grow-1" type="submit">تصفية</button>
+                    <a class="btn btn-outline-secondary" href="{% url 'teacher:assessment_list' %}" title="مسح الفلاتر">مسح</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            {% if assessments %}
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>التقييم</th>
+                                <th>النوع</th>
+                                <th>المادة</th>
+                                <th>الفصل</th>
+                                <th>الترم</th>
+                                <th>الدرجة النهائية</th>
+                                <th>التاريخ</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for assessment in assessments %}
+
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            {{ assessment.title }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        {% if assessment.assessment_type == "exam" %}
+                                            اختبار
+                                        {% else %}
+                                            مشروع
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.subject.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.classroom.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.term }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.max_score }}
+                                    </td>
+
+                                    <td>
+                                        {{ assessment.date|date:"Y-m-d" }}
+                                    </td>
+
+                                    <td>
+
+                                        <a href="{% url 'teacher:assessment_detail' assessment.pk %}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            عرض
+                                        </a>
+
+                                        {% if assessment.classroom.teaching_assignments.all %}
+
+                                            <a href="{% url 'teacher:assessment_edit' assessment.pk %}"
+                                               class="btn btn-sm btn-outline-secondary">
+                                                تعديل
+                                            </a>
+
+                                            <a href="{% url 'teacher:assessment_delete' assessment.pk %}"
+                                               class="btn btn-sm btn-outline-danger">
+                                                حذف
+                                            </a>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+
+                    <h4>لا توجد تقييمات حتى الآن</h4>
+
+                    <p class="text-muted">
+                        يمكنك إنشاء أول اختبار أو مشروع.
+                    </p>
+
+                    <a href="{% url 'teacher:assessment_create' %}"
+                       class="btn btn-primary">
+                        إنشاء تقييم
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

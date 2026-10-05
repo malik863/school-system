@@ -1,0 +1,69 @@
+
+{% extends "schools/teacher/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>فصولي كمعلم فصل</h2>
+            <p class="text-muted mb-0">
+                الفصول التي تتولى مسؤوليتها كمعلم فصل
+            </p>
+        </div>
+    </div>
+
+    {% if classes %}
+
+        <div class="row g-4">
+
+            {% for classroom in classes %}
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="card h-100 shadow-sm">
+
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                {{ classroom.name }}
+                            </h5>
+
+                            <p class="text-muted mb-2">
+                                الصف {{ classroom.grade_level }}
+                            </p>
+
+                            <p class="mb-3">
+                                <i class="fa-solid fa-calendar"></i>
+                                {{ classroom.academic_year.name }}
+                            </p>
+
+                            <a
+                                href="{% url 'teacher:class_detail' classroom.pk %}"
+                                class="btn btn-primary w-100"
+                            >
+                                عرض الفصل
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-info">
+            لا توجد فصول مسندة إليك كمعلم فصل حاليًا.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

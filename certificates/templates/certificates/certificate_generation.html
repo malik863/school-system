@@ -1,0 +1,40 @@
+{% extends "schools/base.html" %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="mb-4">
+        <h2 class="mb-1">إصدار الشهادات</h2>
+        <p class="text-muted mb-0">اختر الفصل والقالب. فترة القالب هي التي تحدد الدرجات المطلوب اكتمالها.</p>
+    </div>
+
+    <div class="card shadow-sm mb-4"><div class="card-body d-flex flex-wrap gap-2">
+        <a href="{% url 'certificates:certificate_generation' %}" class="btn btn-primary"><i class="fa-solid fa-file-circle-check ms-1"></i> إصدار الشهادات</a>
+        <a href="{% url 'certificates:template_list' %}" class="btn btn-outline-primary"><i class="fa-solid fa-palette ms-1"></i> قوالب الشهادات</a>
+    </div></div>
+
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+
+    <div class="card shadow-sm"><div class="card-body">
+        <form method="post">{% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">الفصل</label>
+                    <select name="classroom" class="form-select" required>
+                        <option value="">اختر الفصل</option>
+                        {% for classroom in classrooms %}<option value="{{ classroom.id }}">{{ classroom }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">قالب الشهادة</label>
+                    <select name="template" class="form-select" required>
+                        <option value="">اختر القالب</option>
+                        {% for template in templates %}<option value="{{ template.id }}">{{ template.name }} — {{ template.get_period_display }}</option>{% endfor %}
+                    </select>
+                    <div class="form-text">الفصل الأول يفحص الفصل الأول فقط، والفصل الثاني يفحص الفصل الثاني فقط، وقالب العام الدراسي يفحص الفترات التابعة للعام.</div>
+                </div>
+            </div>
+            <div class="mt-4"><button type="submit" class="btn btn-primary"><i class="fa-solid fa-file-pdf ms-1"></i> إصدار شهادات الفصل</button></div>
+        </form>
+    </div></div>
+</div>
+{% endblock %}

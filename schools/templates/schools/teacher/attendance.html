@@ -1,0 +1,281 @@
+
+{% extends "schools/teacher/base.html" %}
+
+{% block title %}الحضور والغياب{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.attendance-field').forEach(function (wrap) {
+    const select = wrap.querySelector('select[name^="student_"]');
+    if (select) select.dataset.serverStatus = wrap.dataset.serverStatus || "";
+});
+</script>
+<script src="/static/js/offline-attendance.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">
+        الحضور والغياب
+    </h2>
+
+    <p class="text-muted mb-0">
+        تسجيل حضور وغياب طلاب الفصول التي أنت معلمها الرئيسي.
+    </p>
+</div>
+
+
+<!-- اختيار الفصل والتاريخ -->
+<div class="dashboard-card mb-4">
+
+    <form method="get">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+
+                <label class="form-label fw-bold">
+                    الفصل
+                </label>
+
+                {{ form.classroom }}
+
+                {% if form.classroom.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.classroom.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <label class="form-label fw-bold">
+                    التاريخ
+                </label>
+
+                {{ form.date }}
+
+                {% if form.date.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.date.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary w-100"
+                >
+                    <i class="fa-solid fa-users"></i>
+                    عرض الطلاب
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% if selected_classroom %}
+<div class="dashboard-card mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <a class="btn btn-outline-secondary btn-sm" href="?classroom={{ selected_classroom.pk }}&date={{ previous_date|date:'Y-m-d' }}">
+            <i class="fa-solid fa-chevron-right"></i> اليوم السابق
+        </a>
+        <div class="fw-bold">أسبوع {{ week_dates.0|date:'Y-m-d' }} — {{ week_dates.6|date:'Y-m-d' }}</div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary btn-sm" href="?classroom={{ selected_classroom.pk }}&date={{ today|date:'Y-m-d' }}">اليوم</a>
+            <a class="btn btn-outline-secondary btn-sm" href="?classroom={{ selected_classroom.pk }}&date={{ next_date|date:'Y-m-d' }}">اليوم التالي <i class="fa-solid fa-chevron-left"></i></a>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 justify-content-center">
+        {% for item in week_days %}
+            <a href="?classroom={{ selected_classroom.pk }}&date={{ item.date|date:'Y-m-d' }}"
+               class="btn btn-sm {% if item.date == selected_date %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                {{ item.date|date:'D' }}<br><span class="small">{{ item.date|date:'m-d' }}</span><br>
+                <span class="small">{% if item.has_records %}● مسجل{% else %}○ غير مسجل{% endif %}</span>
+            </a>
+        {% endfor %}
+    </div>
+    <div class="small text-muted text-center mt-3">اختر أي يوم لعرض الحضور المحفوظ لذلك التاريخ أو تعديله.</div>
+</div>
+
+{% endif %}
+
+{% if selected_classroom %}
+
+    {% if students %}
+        <div class="alert {% if attendance_state == 'complete' %}alert-success{% elif attendance_state == 'partial' %}alert-warning{% else %}alert-secondary{% endif %} mb-4">
+            {% if attendance_state == 'complete' %}
+                <strong>تم تسجيل حضور هذا اليوم.</strong> {{ recorded_count }} من {{ student_count }} طالب.
+            {% elif attendance_state == 'partial' %}
+                <strong>الحضور غير مكتمل.</strong> تم تسجيل {{ recorded_count }} من {{ student_count }} طالب.
+            {% else %}
+                <strong>لم يتم تسجيل حضور لهذا اليوم بعد.</strong> الحالات أدناه غير مسجلة حتى يتم اختيارها وحفظها.
+            {% endif %}
+        </div>
+
+        <!-- قائمة الطلاب -->
+        <div class="dashboard-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        {{ selected_classroom.name }}
+                    </h5>
+
+                    <small class="text-muted">
+                        الصف {{ selected_classroom.grade_level }}
+                        —
+                        {{ selected_date }}
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary">
+                    {{ students|length }} طالب
+                </span>
+
+            </div>
+
+
+            <form method="post" data-offline-attendance="1">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="classroom"
+                    value="{{ selected_classroom.pk }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="date"
+                    value="{{ selected_date|date:'Y-m-d' }}"
+                >
+
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th style="width: 60px;">
+                                    #
+                                </th>
+
+                                <th>
+                                    الطالب
+                                </th>
+
+                                <th style="width: 220px;">
+                                    الحالة
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for student, field in form.student_fields %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ forloop.counter }}
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong>
+                                            {{ student.first_name }} {{ student.last_name }}
+                                        </strong>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="attendance-field" data-server-status="{{ field.value|default:'' }}">{{ field }}</div>
+
+                                        {% if field.errors %}
+
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="attendance-sync-status" class="alert mt-3" hidden></div>
+
+                <div class="d-flex justify-content-end mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-success px-4"
+                    >
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+
+                        حفظ الحضور
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    {% else %}
+
+        <div class="dashboard-card">
+
+            <div class="text-center py-5 text-muted">
+
+                <i class="fa-solid fa-users-slash fa-2x mb-3"></i>
+
+                <p class="mb-0">
+                    لا يوجد طلاب مسجلون في هذا الفصل.
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "schools/base.html" %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="mb-1">الشهادات</h2>
+            <p class="text-muted mb-0">أنشئ التصاميم هنا، ثم انتقل إلى إصدار الشهادات عند اكتمال الدرجات.</p>
+        </div>
+        <a href="{% url 'certificates:template_create' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus ms-1"></i> إضافة قالب شهادة
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex flex-wrap gap-2">
+            <a href="{% url 'certificates:certificate_generation' %}" class="btn btn-outline-primary">
+                <i class="fa-solid fa-file-circle-check ms-1"></i> إصدار الشهادات
+            </a>
+            <a href="{% url 'certificates:template_list' %}" class="btn btn-primary">
+                <i class="fa-solid fa-palette ms-1"></i> قوالب الشهادات
+            </a>
+        </div>
+    </div>
+
+    {% if templates %}
+    <div class="row g-4">
+        {% for template in templates %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                {% if template.background %}
+                <img src="{{ template.background.url }}" class="card-img-top" style="height:240px;object-fit:contain;background:#f8f9fa" alt="{{ template.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between gap-2 align-items-start">
+                        <h5 class="card-title mb-2">{{ template.name }}</h5>
+                        {% if template.is_active %}<span class="badge bg-success">نشط</span>{% else %}<span class="badge bg-secondary">غير نشط</span>{% endif %}
+                    </div>
+                    <div class="small text-muted mb-2">الفترة: <strong>{{ template.get_period_display }}</strong></div>
+                    {% if template.classroom %}<div class="small text-muted mb-2">الفصل: {{ template.classroom }}</div>{% endif %}
+                    <div class="small text-muted">{{ template.width }} × {{ template.height }}</div>
+                </div>
+                <div class="card-footer bg-white d-flex gap-2">
+                    <a href="{% url 'certificates:template_designer' template.pk %}" class="btn btn-primary btn-sm flex-grow-1">تصميم الشهادة</a>
+                    <a href="{% url 'certificates:template_edit' template.pk %}" class="btn btn-outline-secondary btn-sm">إعدادات</a>
+                    <a href="{% url 'certificates:template_delete' template.pk %}" class="btn btn-outline-danger btn-sm">حذف</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card shadow-sm"><div class="card-body text-center py-5">
+        <h5>لا توجد قوالب شهادات</h5>
+        <p class="text-muted">أضف أول قالب وحدد فترته الدراسية، ثم صممه بالطريقة التي تريدها.</p>
+        <a href="{% url 'certificates:template_create' %}" class="btn btn-primary">إضافة قالب شهادة</a>
+    </div></div>
+    {% endif %}
+</div>
+{% endblock %}

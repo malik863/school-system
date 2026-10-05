@@ -1,0 +1,148 @@
+
+{% extends "schools/base.html" %}
+
+{% block title %}
+تغيير العام الدراسي الحالي
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4" dir="rtl">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7 col-md-9">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <h3 class="mb-4">
+                        تغيير العام الدراسي الحالي
+                    </h3>
+
+
+                    {% if current_year %}
+
+                        <div class="alert alert-secondary">
+
+                            <strong>
+                                العام الدراسي الحالي:
+                            </strong>
+
+                            <div class="mt-2">
+                                {{ current_year.name }}
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="alert alert-warning">
+                            لا يوجد عام دراسي حالي محدد.
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="alert alert-info">
+
+                        <strong>
+                            العام الدراسي الجديد:
+                        </strong>
+
+                        <div class="mt-2">
+                            {{ new_year.name }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert alert-warning mt-4">
+
+                        <h5 class="mb-3">
+                            تنبيه مهم
+                        </h5>
+
+                        <p>
+                            سيصبح
+                            <strong>{{ new_year.name }}</strong>
+                            هو العام الدراسي الحالي للمدرسة.
+                        </p>
+
+                        <p>
+                            لن يتم حذف أو تعديل درجات أو تقييمات
+                            أو سجلات حضور الأعوام السابقة.
+                        </p>
+
+                        <p>
+                            تغيير العام الدراسي
+                            <strong>لن يقوم بترحيل الطلاب</strong>
+                            إلى الصفوف أو الفصول الجديدة تلقائياً.
+                        </p>
+
+                        <p class="mb-0">
+                            بعد تغيير العام الدراسي، يجب تحديد
+                            الترم الحالي الخاص بالعام الجديد.
+                        </p>
+
+                    </div>
+
+
+                    <form method="post" class="mt-4">
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            <label
+                                for="confirmation"
+                                class="form-label"
+                            >
+                                للتأكيد، اكتب
+                                <strong>تغيير العام</strong>
+                            </label>
+
+                            <input
+                                type="text"
+                                name="confirmation"
+                                id="confirmation"
+                                class="form-control"
+                                autocomplete="off"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="d-flex gap-2">
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger"
+                            >
+                                تأكيد تغيير العام الدراسي
+                            </button>
+
+                            <a
+                                href="{% url 'manager:academic_year_list' %}"
+                                class="btn btn-secondary"
+                            >
+                                إلغاء
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

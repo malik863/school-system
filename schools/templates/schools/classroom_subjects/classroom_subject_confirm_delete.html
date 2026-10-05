@@ -1,0 +1,35 @@
+
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>حذف مادة من الفصل</h2>
+
+    <p>
+        هل أنت متأكد من حذف
+        <strong>{{ classroom_subject.subject.name }}</strong>
+        من الفصل
+        <strong>{{ classroom_subject.classroom.name }}</strong>؟
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <button type="submit"
+                class="btn btn-danger">
+            نعم، حذف
+        </button>
+
+        <a href="{% url 'manager:classroom_subject_list' %}"
+           class="btn btn-secondary">
+            إلغاء
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

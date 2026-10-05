@@ -1,0 +1,136 @@
+{% extends "schools/base.html" %}
+{% block title %}التكليفات التدريسية{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">التكليفات التدريسية</h1>
+        <p class="page-subtitle">إدارة إسناد المواد للمعلمين داخل الفصول</p>
+    </div>
+    <a href="{% url 'manager:teaching_assignment_add' %}" class="btn btn-primary">
+        <i class="fa-solid fa-plus ms-1"></i> إضافة تكليف
+    </a>
+</div>
+
+<div class="content-card mb-4">
+    <div class="content-card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-12 col-lg-3">
+                <label for="assignment-search" class="form-label">بحث</label>
+                <input id="assignment-search" type="text" name="q" value="{{ query }}"
+                       class="form-control" placeholder="المعلم أو الفصل أو المادة">
+            </div>
+            <div class="col-12 col-lg-3">
+                <label for="teacher-filter" class="form-label">المعلم</label>
+                <select id="teacher-filter" name="teacher" class="form-select">
+                    <option value="">كل المعلمين</option>
+                    {% for teacher in teachers %}
+                        <option value="{{ teacher.pk }}" {% if selected_teacher == teacher.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ teacher.get_full_name|default:teacher.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-lg-2">
+                <label for="assignment-classroom" class="form-label">الفصل</label>
+                <select id="assignment-classroom" name="classroom" class="form-select">
+                    <option value="">كل الفصول</option>
+                    {% for classroom in classrooms %}
+                        <option value="{{ classroom.pk }}" {% if selected_classroom == classroom.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ classroom.name }} — {{ classroom.academic_year.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-lg-2">
+                <label for="subject-filter" class="form-label">المادة</label>
+                <select id="subject-filter" name="subject" class="form-select">
+                    <option value="">كل المواد</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.pk }}" {% if selected_subject == subject.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="fa-solid fa-magnifying-glass"></i> بحث
+                </button>
+                <a href="{% url 'manager:teaching_assignment_list' %}" class="btn btn-outline-secondary" title="مسح الفلاتر">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="content-card-title">التكليفات</div>
+        <span class="text-muted small">{{ page_obj.paginator.count }} تكليف</span>
+    </div>
+    <div class="content-card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>الفصل</th>
+                        <th>المادة</th>
+                        <th>المعلم</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                    <tr>
+                        <td class="fw-semibold">{{ assignment.classroom.name }}</td>
+                        <td>{{ assignment.subject.name }}</td>
+                        <td>{{ assignment.teacher.get_full_name|default:assignment.teacher.username }}</td>
+                        <td class="text-nowrap">
+                            <a href="{% url 'manager:teaching_assignment_edit' assignment.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-pen"></i> تعديل
+                            </a>
+                            <a href="{% url 'manager:teaching_assignment_delete' assignment.pk %}" class="btn btn-sm btn-outline-danger">
+                                <i class="fa-solid fa-trash"></i> حذف
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fa-solid fa-chalkboard-user fs-2 mb-3 d-block"></i>
+                                لا توجد نتائج مطابقة.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-4" aria-label="تنقل التكليفات">
+    <ul class="pagination justify-content-center flex-wrap">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?q={{ query|urlencode }}&teacher={{ selected_teacher|urlencode }}&classroom={{ selected_classroom|urlencode }}&subject={{ selected_subject|urlencode }}&page={{ page_obj.previous_page_number }}">السابق</a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <li class="page-item"><a class="page-link" href="?q={{ query|urlencode }}&teacher={{ selected_teacher|urlencode }}&classroom={{ selected_classroom|urlencode }}&subject={{ selected_subject|urlencode }}&page={{ num }}">{{ num }}</a></li>
+            {% elif num == 2 or num == page_obj.paginator.num_pages|add:"-1" %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?q={{ query|urlencode }}&teacher={{ selected_teacher|urlencode }}&classroom={{ selected_classroom|urlencode }}&subject={{ selected_subject|urlencode }}&page={{ page_obj.next_page_number }}">التالي</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

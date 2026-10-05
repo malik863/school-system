@@ -1,0 +1,36 @@
+{% extends "schools/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>حذف التكليف</h2>
+
+    <p>
+        هل أنت متأكد من حذف تكليف
+        <strong>{{ assignment.teacher.get_full_name|default:assignment.teacher.username }}</strong>
+        لتدريس
+        <strong>{{ assignment.subject.name }}</strong>
+        في
+        <strong>{{ assignment.classroom.name }}</strong>؟
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <button type="submit"
+                class="btn btn-danger">
+            نعم، حذف
+        </button>
+
+        <a href="{% url 'manager:teaching_assignment_list' %}"
+           class="btn btn-secondary">
+            إلغاء
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
