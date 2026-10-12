@@ -77,3 +77,31 @@ class OfflineAttendanceSyncTests(TestCase):
         response = self.post(self.payload())
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Attendance.objects.filter(student=self.student).exists())
+
+    def test_manager_cannot_sync_offline_attendance(self):
+        User = get_user_model()
+        manager = User.objects.create_user(
+            username="manager", password="pass12345", role=User.Role.SCHOOL_MANAGER, school=self.school
+        )
+        self.client.force_login(manager)
+        response = self.post(self.payload())
+        self.assertNotEqual(response.status_code, 200)
+        self.assertFalse(Attendance.objects.filter(student=self.student).exists())
+
+    def test_duplicate_student_in_batch_rejected(self):
+        payload = self.payload()
+        payload["records"].append(dict(payload["records"][0]))
+        response = self.post(payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Attendance.objects.filter(student=self.student).exists())
+
+    def test_student_moved_to_another_class_cannot_sync(self):
+        other_class = Classroom.objects.create(
+            school=self.school, academic_year=self.year, name="B", grade_level=1,
+            lead_teacher=self.other_teacher,
+        )
+        self.student.classroom = other_class
+        self.student.save()
+        response = self.post(self.payload())
+        self.assertEqual(response.status_code, 409)
+        self.assertFalse(Attendance.objects.filter(student=self.student).exists())

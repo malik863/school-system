@@ -4,7 +4,7 @@ from django.views.decorators.cache import never_cache
 
 @never_cache
 def service_worker(request):
-    source = r'''const STATIC_CACHE = "school-static-v1";
+    source = r'''const STATIC_CACHE = "school-static-v2";
 let currentUser = null;
 const META_CACHE = "school-offline-meta-v1";
 
@@ -17,10 +17,7 @@ async function getCurrentUser() {
 }
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(STATIC_CACHE).then(cache => cache.addAll([
-    "/static/js/offline-core.js",
-    "/static/js/offline-attendance.js"
-  ])));
+  event.waitUntil(caches.open(STATIC_CACHE));
   self.skipWaiting();
 });
 
@@ -38,6 +35,51 @@ self.addEventListener("message", event => {
     await Promise.all(keys.map(key => {
       if (key.startsWith("school-pages-") && key !== `school-pages-${next}`) return caches.delete(key);
     }));
+    event.ports?.[0]?.postMessage({type: "USER_READY"});
+  })());
+});
+
+self.addEventListener("message", event => {
+  if (event.data?.type !== "CLEAR_USER") return;
+  const user = String(event.data.userId || "");
+  event.waitUntil((async () => {
+    await caches.delete(`school-pages-${user}`);
+    const meta = await caches.open(META_CACHE);
+    await meta.delete("/offline-current-user");
+    currentUser = null;
+  })());
+});
+
+self.addEventListener("message", event => {
+  if (event.data?.type !== "PREPARE_PAGES") return;
+  const urls = Array.isArray(event.data.urls) ? event.data.urls.slice(0, 200) : [];
+  const user = String(event.data.userId || "");
+  event.waitUntil((async () => {
+    const port = event.ports?.[0];
+    const active = await getCurrentUser();
+    if (!user || active !== user) {
+      port?.postMessage({type: "PREPARE_DONE", saved: 0, total: urls.length, failed: urls.length});
+      return;
+    }
+    const cache = await caches.open(`school-pages-${user}`);
+    let saved = 0;
+    const failedUrls = [];
+    for (const path of urls) {
+      const url = new URL(path, self.location.origin);
+      if (url.origin !== self.location.origin || !(/^\/(teacher|manager)\//).test(url.pathname)) continue;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 6500);
+      try {
+        const response = await fetch(url.href, {credentials: "same-origin", cache: "no-store", signal: controller.signal});
+        if (response.ok && !response.redirected && response.headers.get("content-type")?.includes("text/html") &&
+            (await getCurrentUser()) === user) {
+          await cache.put(url.href, response);
+          saved++;
+        } else failedUrls.push(path);
+      } catch (_) { failedUrls.push(path); }
+      finally { clearTimeout(timer); }
+    }
+    port?.postMessage({type: "PREPARE_DONE", saved, total: urls.length, failed: failedUrls.length, failedUrls});
   })());
 });
 
@@ -57,7 +99,7 @@ self.addEventListener("fetch", event => {
       const cacheName = user ? `school-pages-${user}` : null;
       try {
         const response = await fetch(request);
-        if (cacheName && response.ok) {
+        if (cacheName && response.ok && !response.redirected && response.headers.get("content-type")?.includes("text/html")) {
           const cache = await caches.open(cacheName);
           await cache.put(request, response.clone());
         }
@@ -75,11 +117,13 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
   if (url.pathname.startsWith("/static/") || url.origin !== self.location.origin) {
-    event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-      const copy = response.clone();
-      caches.open(STATIC_CACHE).then(cache => cache.put(request, copy)).catch(() => {});
+    event.respondWith(fetch(request).then(response => {
+      if (response.ok) {
+        const copy = response.clone();
+        caches.open(STATIC_CACHE).then(cache => cache.put(request, copy)).catch(() => {});
+      }
       return response;
-    })));
+    }).catch(async () => (await caches.match(request)) || Response.error()));
   }
 });'''
     response = HttpResponse(source, content_type="application/javascript; charset=utf-8")

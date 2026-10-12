@@ -84,6 +84,7 @@ class StudentProfile(SchoolOwnedModel):
                     "school",
                     "student_number",
                 ],
+                condition=~models.Q(student_number=""),
                 name="unique_student_number_per_school",
             ),
         ]

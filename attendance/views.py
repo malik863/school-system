@@ -362,6 +362,8 @@ def offline_attendance_sync(request):
         classroom_id = int(payload.get("classroom_id"))
         selected_date = datetime.strptime(payload.get("date", ""), "%Y-%m-%d").date()
         records = payload.get("records") or []
+        if not isinstance(records, list) or not records or len(records) > 1000:
+            return JsonResponse({"error": "قائمة الحضور غير صالحة."}, status=400)
     except (ValueError, TypeError, json.JSONDecodeError):
         return JsonResponse({"error": "بيانات المزامنة غير صالحة."}, status=400)
 
@@ -397,6 +399,9 @@ def offline_attendance_sync(request):
             return JsonResponse({"error": "حالة حضور غير صالحة."}, status=400)
         student_ids.append(student_id)
         normalized.append((student_id, status, baseline))
+
+    if len(student_ids) != len(set(student_ids)):
+        return JsonResponse({"error": "تكرار الطالب في بيانات الحضور."}, status=400)
 
     students = {
         student.pk: student

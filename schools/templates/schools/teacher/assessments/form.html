@@ -12,7 +12,7 @@
 
         <div class="card-body">
 
-            <form method="post">
+            <form method="post" id="assessment-save-form">
 
                 {% csrf_token %}
 
@@ -134,6 +134,27 @@
                 </div>
 
             </form>
+            <script>
+            (() => {
+              const form = document.getElementById('assessment-save-form');
+              if (!form) return;
+              form.addEventListener('submit', (event) => {
+                if (form.dataset.submitting === 'true') {
+                  event.preventDefault();
+                  return;
+                }
+                form.dataset.submitting = 'true';
+                // Do not disable the clicked submit button: disabled buttons may
+                // change submitted form values. Prevent repeated submit events.
+                const submit = form.querySelector('button[type="submit"]');
+                if (submit) {
+                  submit.setAttribute('aria-disabled', 'true');
+                  submit.classList.add('disabled');
+                  submit.innerHTML = 'جارٍ الحفظ...';
+                }
+              });
+            })();
+            </script>
 
         </div>
 

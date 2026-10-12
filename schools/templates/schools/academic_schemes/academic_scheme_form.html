@@ -286,6 +286,14 @@
     <!-- GRADE SCHEME -->
     <!-- ================================================= -->
 
+    {% if not scheme %}
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-body">
+        <h5 class="fw-bold mb-2"><i class="fa-solid fa-chart-pie ms-2"></i> نظام الدرجات</h5>
+        <p class="text-muted mb-0">بعد إنشاء النظام الأكاديمي وحفظ الفصول والمواد، سيتم فتح إعداد توزيع الدرجات مباشرةً في صفحة التعديل. هذه الخطوة ضرورية أولاً حتى ترتبط قواعد الدرجات بالنظام الصحيح.</p>
+      </div>
+    </div>
+    {% endif %}
     {% if scheme %}
 
     <div class="card border-0 shadow-sm mt-4">

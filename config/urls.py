@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path,include
 from schools.views import landing_page
 from core.offline import service_worker
+from core.offline_manifest import offline_manifest
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -25,6 +26,7 @@ from django.conf.urls.static import static
 urlpatterns = [
 
     path("service-worker.js", service_worker, name="service_worker"),
+    path("offline-manifest/", offline_manifest, name="offline_manifest"),
 
     path("", landing_page, name="landing"),
     path('admin/', admin.site.urls),

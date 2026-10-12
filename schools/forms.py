@@ -344,6 +344,20 @@ class StudentCreateForm(forms.ModelForm):
             "is_active": "الطالب نشط",
         }
 
+    def clean_student_number(self):
+        number = (self.cleaned_data.get("student_number") or "").strip()
+        if number and self.school:
+            existing = StudentProfile.objects.filter(
+                school=self.school, student_number=number
+            )
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                raise forms.ValidationError(
+                    "رقم الطالب مستخدم بالفعل لطالب آخر في هذه المدرسة."
+                )
+        return number
+
     def __init__(self, *args, **kwargs):
         self.school = kwargs.pop("school", None)
         super().__init__(*args, **kwargs)
@@ -547,6 +561,20 @@ class StudentUpdateForm(forms.ModelForm):
             "date_of_birth": "تاريخ الميلاد (اختياري)",
             "is_active": "الطالب نشط",
         }
+
+    def clean_student_number(self):
+        number = (self.cleaned_data.get("student_number") or "").strip()
+        if number and self.school:
+            existing = StudentProfile.objects.filter(
+                school=self.school, student_number=number
+            )
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                raise forms.ValidationError(
+                    "رقم الطالب مستخدم بالفعل لطالب آخر في هذه المدرسة."
+                )
+        return number
 
     def __init__(self, *args, **kwargs):
         self.school = kwargs.pop("school", None)

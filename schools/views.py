@@ -55,6 +55,108 @@ def get_form_kwargs(request, **extra):
 # DASHBOARD
 # ============================================================
 
+def _attention_student_ids(school, current_year, current_term):
+    """Single source of truth for manager dashboard and follow-up list."""
+    active_students = StudentProfile.objects.filter(school=school, is_active=True)
+    if current_year:
+        active_students = active_students.filter(classroom__academic_year=current_year)
+    LOW_ACADEMIC_THRESHOLD = 50
+    LOW_ATTENDANCE_THRESHOLD = 75
+    low_academic_student_ids = set()
+    low_attendance_student_ids = set()
+
+    # ------------------------------------------------------------
+    # Low academic performance
+    # ------------------------------------------------------------
+
+    if current_term:
+
+        student_grade_stats = (
+            Grade.objects
+            .filter(
+                school=school,
+                assessment__term=current_term,
+                student__in=active_students,
+                student__classroom=F("assessment__classroom"),
+            )
+            .values("student_id")
+            .annotate(
+                total_score=Sum("score"),
+                total_max_score=Sum("assessment__max_score"),
+            )
+        )
+
+        for item in student_grade_stats:
+
+            total_max = item["total_max_score"]
+
+            if not total_max:
+                continue
+
+            percentage = (
+                float(item["total_score"])
+                / float(total_max)
+            ) * 100
+
+            if percentage < LOW_ACADEMIC_THRESHOLD:
+                low_academic_student_ids.add(
+                    item["student_id"]
+                )
+
+    # ------------------------------------------------------------
+    # Low attendance
+    # ------------------------------------------------------------
+
+    if current_term:
+
+        # Notice that there is deliberately NO classroom filter here.
+        #
+        # Attendance belongs to the student and term.
+        # If the student changes classroom, their earlier attendance
+        # must still remain part of their attendance percentage.
+        attendance_stats = (
+            Attendance.objects
+            .filter(
+                school=school,
+                term=current_term,
+                student__in=active_students,
+            )
+            .values("student_id")
+            .annotate(
+                total_days=Count("id"),
+                attended_days=Count(
+                    "id",
+                    filter=Q(
+                        status__in=[
+                            Attendance.Status.PRESENT,
+                            Attendance.Status.LATE,
+                            Attendance.Status.EXCUSED,
+                        ]
+                    ),
+                ),
+            )
+        )
+
+        for item in attendance_stats:
+
+            total_days = item["total_days"]
+
+            if not total_days:
+                continue
+
+            percentage = (
+                item["attended_days"]
+                / total_days
+            ) * 100
+
+            if percentage < LOW_ATTENDANCE_THRESHOLD:
+                low_attendance_student_ids.add(
+                    item["student_id"]
+                )
+
+    return low_academic_student_ids, low_attendance_student_ids
+
+
 @school_admin_required
 def manager_dashboard(request):
     school = request.user.school
@@ -203,97 +305,9 @@ def manager_dashboard(request):
     LOW_ACADEMIC_THRESHOLD = 50
     LOW_ATTENDANCE_THRESHOLD = 75
 
-    low_academic_student_ids = set()
-    low_attendance_student_ids = set()
-
-    # ------------------------------------------------------------
-    # Low academic performance
-    # ------------------------------------------------------------
-
-    if current_term:
-
-        student_grade_stats = (
-            Grade.objects
-            .filter(
-                school=school,
-                assessment__term=current_term,
-                student__in=active_students,
-                student__classroom=F("assessment__classroom"),
-            )
-            .values("student_id")
-            .annotate(
-                total_score=Sum("score"),
-                total_max_score=Sum("assessment__max_score"),
-            )
-        )
-
-        for item in student_grade_stats:
-
-            total_max = item["total_max_score"]
-
-            if not total_max:
-                continue
-
-            percentage = (
-                float(item["total_score"])
-                / float(total_max)
-            ) * 100
-
-            if percentage < LOW_ACADEMIC_THRESHOLD:
-                low_academic_student_ids.add(
-                    item["student_id"]
-                )
-
-    # ------------------------------------------------------------
-    # Low attendance
-    # ------------------------------------------------------------
-
-    if current_term:
-
-        # Notice that there is deliberately NO classroom filter here.
-        #
-        # Attendance belongs to the student and term.
-        # If the student changes classroom, their earlier attendance
-        # must still remain part of their attendance percentage.
-        attendance_stats = (
-            Attendance.objects
-            .filter(
-                school=school,
-                term=current_term,
-                student__in=active_students,
-            )
-            .values("student_id")
-            .annotate(
-                total_days=Count("id"),
-                attended_days=Count(
-                    "id",
-                    filter=Q(
-                        status__in=[
-                            Attendance.Status.PRESENT,
-                            Attendance.Status.LATE,
-                            Attendance.Status.EXCUSED,
-                        ]
-                    ),
-                ),
-            )
-        )
-
-        for item in attendance_stats:
-
-            total_days = item["total_days"]
-
-            if not total_days:
-                continue
-
-            percentage = (
-                item["attended_days"]
-                / total_days
-            ) * 100
-
-            if percentage < LOW_ATTENDANCE_THRESHOLD:
-                low_attendance_student_ids.add(
-                    item["student_id"]
-                )
+    low_academic_student_ids, low_attendance_student_ids = _attention_student_ids(
+        school, current_year, current_term
+    )
 
     # A student may be in both groups.
     students_needing_attention_ids = (
@@ -502,11 +516,27 @@ def manager_dashboard(request):
 
 @school_admin_required
 def teacher_list(request):
+    query = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
     teachers = User.objects.filter(
         school=request.user.school,
         role=User.Role.TEACHER,
-    ).order_by("first_name", "last_name", "username")
-    return render(request, "schools/teachers/teacher_list.html", {"teachers": teachers})
+    )
+    if query:
+        name_query = Q(first_name__icontains=query) | Q(last_name__icontains=query)
+        parts = query.split()
+        if len(parts) > 1:
+            name_query |= Q(first_name__icontains=parts[0], last_name__icontains=" ".join(parts[1:]))
+        teachers = teachers.filter(
+            name_query | Q(username__icontains=query) |
+            Q(email__icontains=query) | Q(phone_number__icontains=query)
+        )
+    if status in ("active", "inactive"):
+        teachers = teachers.filter(is_active=(status == "active"))
+    teachers = teachers.order_by("first_name", "last_name", "username")
+    return render(request, "schools/teachers/teacher_list.html", {
+        "teachers": teachers, "query": query, "status": status,
+    })
 
 
 @school_admin_required
@@ -813,10 +843,20 @@ def student_list(request):
     school = request.user.school
     query = request.GET.get("q", "").strip()
     classroom_id = request.GET.get("classroom", "").strip()
+    attention_filter = request.GET.get("attention", "").strip()
 
     students = StudentProfile.objects.filter(
         school=school,
     ).select_related("user", "classroom")
+
+    if attention_filter in ("all", "academic", "attendance"):
+        current_year = AcademicYear.objects.filter(school=school, is_current=True).first()
+        current_term = Term.objects.filter(school=school, is_current=True).first()
+        academic_ids, attendance_ids = _attention_student_ids(school, current_year, current_term)
+        selected_ids = (academic_ids if attention_filter == "academic" else
+                        attendance_ids if attention_filter == "attendance" else
+                        academic_ids | attendance_ids)
+        students = students.filter(pk__in=selected_ids)
 
     if query:
         # Match individual fields as before, but also support a full name
@@ -869,6 +909,7 @@ def student_list(request):
             "classrooms": classrooms,
             "query": query,
             "selected_classroom": classroom_id,
+            "attention_filter": attention_filter,
         },
     )
 
@@ -1529,7 +1570,21 @@ def teacher_dashboard(request):
         )
     )
 
+    from django.utils import timezone
+    lead_ids = list(lead_classes.values_list("id", flat=True))
+    lead_student_count = StudentProfile.objects.filter(
+        school=school, classroom_id__in=lead_ids, is_active=True
+    ).count()
+    today_records = Attendance.objects.filter(
+        school=school, classroom_id__in=lead_ids, date=timezone.localdate()
+    )
+    lead_today_recorded = today_records.count()
+    lead_today_absent = today_records.filter(status=Attendance.Status.ABSENT).count()
+
     context = {
+        "lead_student_count": lead_student_count,
+        "lead_today_recorded": lead_today_recorded,
+        "lead_today_absent": lead_today_absent,
         "assignments": assignments,
         "total_assignments": total_assignments,
         "total_classes": total_classes,

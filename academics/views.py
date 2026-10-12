@@ -170,12 +170,19 @@ def teaching_assignment_list(request):
             | Q(teacher__last_name__icontains=query)
         )
         if len(name_parts) >= 2:
-            first_part = name_parts[0]
-            last_part = " ".join(name_parts[1:])
-            teacher_name_query |= Q(
-                teacher__first_name__icontains=first_part,
-                teacher__last_name__icontains=last_part,
-            )
+            # Match all words across first and last names, even when spacing differs.
+            for part in name_parts:
+                teacher_name_query = teacher_name_query | (
+                    Q(teacher__first_name__icontains=part) |
+                    Q(teacher__last_name__icontains=part)
+                )
+            full_name_match = Q()
+            for part in name_parts:
+                full_name_match &= (
+                    Q(teacher__first_name__icontains=part) |
+                    Q(teacher__last_name__icontains=part)
+                )
+            teacher_name_query = full_name_match
 
         assignments = assignments.filter(
             teacher_name_query
